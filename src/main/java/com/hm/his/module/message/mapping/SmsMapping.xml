@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.message.dao.SmsMapper">
+    <resultMap id="smsRecordResultMap" type="com.hm.his.module.message.model.SmsRecord">
+        <id column="id" property="id"/>
+        <result column="sender" property="sender" />
+        <result column="sms_type" property="smsType" />
+        <result column="service_number" property="serviceNumber" />
+        <result column="content" property="content" />
+        <result column="bill_amount" property="billAmount" />
+        <result column="recipient" property="recipient" />
+        <result column="recipient_name" property="recipientName" />
+        <result column="recipient_name_pinyin" property="recipientNamePinyin"/>
+        <result column="phoneNo" property="phoneNo" />
+        <result column="status" property="status" />
+        <result column="signature" property="signature" />
+        <result column="operator" property="operator" />
+        <result column="create_date" property="createDate" />
+        <result column="modify_date" property="modifyDate" />
+    </resultMap>
+    <select id="getLastSmsRecord" parameterType="java.lang.Long" resultMap="smsRecordResultMap">
+        SELECT id, sender, sms_type, service_number, content, bill_amount, recipient, phone_no, status, signature, create_date, modify_date
+        FROM sms_record
+        WHERE recipient = #{patientId}
+        ORDER BY modify_date DESC limit 1
+    </select>
+    <select id="getSendedSmsList" resultMap="smsRecordResultMap" parameterType="com.hm.his.module.message.pojo.SmsRequest">
+        SELECT
+        sr.id,sr.sender,sr.sms_type,sr.service_number,sr.content,sr.bill_amount,sr.recipient,
+        sr.phone_no,sr.`status`,sr.signature,d.real_name,sr.create_date,sr.modify_date,d.real_name operator
+        FROM
+        sms_record sr
+        JOIN doctor d ON sr.sender = d.doctor_id
+        WHERE 1 = 1
+        <if test = "startDate != null" >
+            <![CDATA[ and sr.create_date >= #{startDate} ]]>
+        </if>
+        <if test = "endDate != null" >
+            <![CDATA[ and sr.create_date <= #{endDate} ]]>
+        </if>
+        <if test="sendStatus != null">
+            and sr.`status` = #{sendStatus}
+        </if>
+        <if test="hospitalId != null">
+            AND sender IN(select doctor_id from doctor where hospital_id = #{hospitalId})
+        </if>
+        <if test="condition != null and condition != ''">
+            and (
+            sr.recipient_name like CONCAT(#{condition}, '%')
+            or
+            sr.recipient_name_pinyin like CONCAT(#{condition}, '%')
+            or
+            sr.phone_no like CONCAT(#{condition}, '%')
+            )
+        </if>
+        ORDER BY sr.create_date DESC limit #{startRecord}, #{pageSize}
+    </select>
+
+    <select id="getSendedSmsListCount" parameterType="com.hm.his.module.message.pojo.SmsRequest" resultType="java.lang.Integer">
+        SELECT
+        count(*)
+        FROM
+        sms_record sr
+        JOIN doctor d ON sr.sender = d.doctor_id
+        WHERE 1 = 1
+        <if test = "startDate != null" >
+            <![CDATA[ and sr.create_date >= #{startDate} ]]>
+        </if>
+        <if test = "endDate != null" >
+            <![CDATA[ and sr.create_date <= #{endDate} ]]>
+        </if>
+        <if test="sendStatus != null">
+            and sr.`status` = #{sendStatus}
+        </if>
+        <if test="hospitalId != null">
+            AND sender IN(select doctor_id from doctor where hospital_id = #{hospitalId})
+        </if>
+        <if test="condition != null and condition != ''">
+            and (
+            sr.recipient_name like CONCAT(#{condition}, '%')
+            or
+            sr.recipient_name_pinyin like CONCAT(#{condition}, '%')
+            or
+            sr.phone_no like CONCAT(#{condition}, '%')
+            )
+        </if>
+    </select>
+
+    <insert id="insertSmsRecord" parameterType="java.util.List">
+        INSERT INTO sms_record(sender, sms_type, service_number, content, bill_amount,
+        recipient, recipient_name, recipient_name_pinyin, phone_no, status, signature)
+        VALUES
+        <foreach collection="list" item="record" index="index" separator=",">
+            (#{record.sender}, #{record.smsType}, #{record.serviceNumber}, #{record.content}, #{record.billAmount},
+            #{record.recipient}, #{record.recipientName}, #{record.recipientNamePinyin}, #{record.phoneNo}, #{record.status}, #{record.signature})
+        </foreach>
+    </insert>
+
+
+
+
+
+    <resultMap id="smsConfigResultMap" type="com.hm.his.module.message.model.SmsConfig">
+        <id column="id" property="id" />
+        <result column="hospital_id" property="hospitalId" />
+        <result column="service_number" property="serviceNumber" />
+        <result column="sms_upper_limit" property="smsUpperLimit" />
+        <result column="surplus_amount" property="surplusAmount" />
+        <result column="status" property="status" />
+        <result column="signature" property="signature" />
+        <result column="create_date" property="createDate" />
+        <result column="modify_date" property="modifyDate" />
+    </resultMap>
+    <select id="getSmsConfig" resultMap="smsConfigResultMap" parameterType="java.lang.Long">
+        SELECT id, hospital_id, service_number, sms_upper_limit, surplus_amount, status, signature, create_date, modify_date
+        FROM sms_config
+        WHERE hospital_id = #{hospital_id}
+        ORDER BY modify_date limit 1
+    </select>
+    <update id="updateSmsConfig" parameterType="com.hm.his.module.message.model.SmsConfig">
+        UPDATE sms_config
+        <set>
+            <if test="serviceNumber != null">
+                service_number = #{serviceNumber},
+            </if>
+            <if test="smsUpperLimit != null">
+                sms_upper_limit = #{smsUpperLimit},
+            </if>
+            <if test="surplusAmount != null">
+                surplus_amount = #{surplusAmount},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="signature != null">
+                signature = #{signature}
+            </if>
+        </set>
+        WHERE hospital_id = #{hospitalId}
+    </update>
+
+    <insert id="insertSmsConfig" parameterType="com.hm.his.module.message.model.SmsConfig">
+        INSERT INTO sms_config(hospital_id, service_number, sms_upper_limit, surplus_amount, status, signature)
+        VALUES(#{hospitalId}, #{serviceNumber}, #{smsUpperLimit}, #{surplusAmount}, #{status}, #{signature})
+    </insert>
+</mapper>

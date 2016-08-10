@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.user.dao.BoundInfoMapper">
+	<resultMap id="boundInfoResultMap" type="com.hm.his.module.user.model.BoundInfo">
+		<id column="bound_id" property="boundId" />
+		<result column="open_id" property="openId" />
+		<result column="doctor_name" property="doctorName" />
+		<result column="password" property="password" />
+		<result column="high_passwd" property="highPasswd" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="bound_date" property="boundDate"/>
+	</resultMap>
+	<sql id="Base_Column_List" >
+		bound_id, open_id, doctor_name, password, high_passwd, doctor_id, hospital_id, bound_date
+	</sql>
+	<select id="getBoundByOpenId" resultMap="boundInfoResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from bound_info where open_id = #{openId}
+	</select>
+
+	<select id="searchBoundForUpdatePwd" resultMap="boundInfoResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from bound_info
+	</select>
+
+	
+	<select id="isBoundingByDoctor" resultType="java.lang.Integer">
+		select count(bound_id) from bound_info where open_id = #{openId} and doctor_name = #{doctorName}
+	</select>
+	
+	<select id="isBoundingByHospital" resultType="java.lang.Integer">
+		select count(bound_id) from bound_info where open_id = #{openId} and hospital_id = #{hospitalId}
+	</select>
+	
+	<select id="getDoctorId" resultType="java.lang.Long">
+		select doctor_id from bound_info where open_id = #{openId} and hospital_id = #{hospitalId}
+	</select>
+	
+	<delete id="rescissionHospital">
+		delete from bound_info where open_id = #{openId} and hospital_id = #{hospitalId}
+	</delete>
+	<insert id="insertBoundInfo" parameterType="com.hm.his.module.user.model.BoundInfo">
+		insert into bound_info (bound_id, open_id, doctor_name, password,high_passwd, doctor_id, hospital_id, bound_date)
+		values (#{boundId}, #{openId}, #{doctorName}, #{password},#{highPasswd}, #{doctorId}, #{hospitalId}, #{boundDate})
+	</insert>
+	<update id="updateBoundInfo" parameterType="com.hm.his.module.user.model.BoundInfo">
+		update bound_info set 
+			open_id = #{openId},
+			doctor_name = #{doctorName},
+			password = #{password},
+			high_passwd = #{highPasswd},
+			doctor_id = #{doctorId},
+			hospital_id = #{hospitalId},
+			bound_date = #{boundDate}
+		where open_id = #{openId} and hospital_id = #{hospitalId}
+	</update>
+
+	<update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.user.model.BoundInfo" >
+		update bound_info
+		<set >
+			<if test="openId != null" >
+				open_id = #{openId,jdbcType=VARCHAR},
+			</if>
+			<if test="doctorName != null" >
+				doctor_name = #{doctorName,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null" >
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="highPasswd != null" >
+				high_passwd = #{highPasswd,jdbcType=VARCHAR},
+			</if>
+			<if test="doctorId != null" >
+				doctor_id = #{doctorId,jdbcType=INTEGER},
+			</if>
+			<if test="hospitalId != null" >
+				hospital_id = #{hospitalId,jdbcType=INTEGER},
+			</if>
+			<if test="boundDate != null" >
+				bound_date = #{boundDate,jdbcType=TIMESTAMP},
+			</if>
+		</set>
+		where bound_id = #{boundId,jdbcType=INTEGER}
+	</update>
+</mapper>

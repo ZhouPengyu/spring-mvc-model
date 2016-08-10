@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.purchase.dao.PurchaseOrderMapper">
+	<resultMap id="purchaseOrderResultMap"
+		type="com.hm.his.module.purchase.model.PurchaseOrder">
+		<result column="purchase_order_id" property="purchaseOrderId" jdbcType="INTEGER" />
+		<result column="purchase_order_number" property="purchaseOrderNumber" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="message" property="message" jdbcType="VARCHAR" />
+		<result column="delivery_address_id" property="deliveryAddressId" jdbcType="INTEGER" />
+		<result column="delivery_address" property="deliveryAddress" />
+		<result column="creater" property="creater" jdbcType="INTEGER" />
+		<result column="real_name" property="createrName" jdbcType="VARCHAR" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="designated" property="designated" jdbcType="INTEGER" />
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<select id="queryPurchaseOrder" resultMap="purchaseOrderResultMap">
+		select po.purchase_order_id, po.purchase_order_number, po.status, 
+			po.remark, po.message, po.delivery_address_id, po.creater, po.create_date, po.designated
+		from purchase_order po 
+		where flag = 1 
+		<if test="purchaseOrderNumber != null and purchaseOrderNumber != ''">
+			and po.purchase_order_number = #{purchaseOrderNumber} 
+		</if>
+		<if test="timeQuantum != null and timeQuantum != ''">
+			and po.create_date >= current_date() - #{timeQuantum} 
+		</if>
+		<if test="status != null">
+			and po.status = #{status} 
+		</if>
+		<if test="startDate != null and startDate != ''">
+ 			and po.create_date >= #{startDate} and po.create_date <![CDATA[ <= ]]> #{endDate}
+ 		</if>
+		<if test="hospitalId != null">
+			and po.creater in (select doctor_id from doctor where hospital_id = #{hospitalId})
+		</if>
+		order by po.purchase_order_id desc 
+		limit #{startRecord}, #{pageSize}
+	</select>
+	
+	<select id="queryPurchaseOrderCount" resultType="java.lang.Integer">
+		select count(po.purchase_order_id) from purchase_order po 
+		where flag = 1 
+		<if test="purchaseOrderNumber != null and purchaseOrderNumber != ''">
+			and po.purchase_order_number = #{purchaseOrderNumber} 
+		</if>
+		<if test="timeQuantum != null and timeQuantum != ''">
+			and po.create_date >= current_date() - #{timeQuantum} 
+		</if>
+ 		<if test="startDate != null and startDate != ''">
+ 			and po.create_date >= #{startDate} and po.create_date <![CDATA[ <= ]]> #{endDate}
+ 		</if>
+		<if test="status != null">
+			and po.status = #{status} 
+		</if>
+		<if test="hospitalId != null">
+			and po.creater in (select doctor_id from doctor where hospital_id = #{hospitalId})
+		</if>
+	</select>
+	
+	<select id="queryPurchaseOrderAll" resultMap="purchaseOrderResultMap">
+		select po.purchase_order_id, po.purchase_order_number, po.status, 
+			po.remark, po.message, po.delivery_address_id, po.creater, po.create_date, po.designated 
+		from purchase_order po 
+		where flag = 1 and (po.status = 1 or po.status = 2) 
+		<if test="purchaseOrderNumber != null and purchaseOrderNumber != ''">
+			and po.purchase_order_number = #{purchaseOrderNumber} 
+		</if>
+		<if test="timeQuantum != null and timeQuantum != ''">
+			and po.create_date >= current_date() - #{timeQuantum} 
+		</if>
+		<if test="startDate != null and startDate != ''">
+ 			<![CDATA[and po.create_date >= #{startDate} and po.create_date <= #{endDate} ]]>
+ 		</if>
+		<if test="hospitalId != null">
+			and po.creater in (select doctor_id from doctor where hospital_id = #{hospitalId}) 
+		</if>
+		order by po.purchase_order_id desc 
+	</select>
+	
+	<!-- 获取报价厂家总数 -->
+	<select id="getQuoteCount" resultType="java.lang.Integer">
+		select count(pur_quo_relation_id) from purchase_quote_relation
+		where status = 1 and purchase_order_id = #{purchaseOrderId}
+	</select>
+	
+	<!-- 获取报价单ID -->
+	<select id="getQuoteOrderId" resultType="java.lang.Integer">
+		select quote_order_id from purchase_quote_relation
+		where status = 2 and purchase_order_id = #{purchaseOrderId}
+	</select>
+	
+	<select id="getPurchaseOrder" resultMap="purchaseOrderResultMap">
+		select po.purchase_order_id, po.purchase_order_number, po.status, 
+			po.remark, po.message, po.delivery_address_id, 
+			da.address as delivery_address, po.creater, d.real_name, po.create_date, po.designated 
+		from purchase_order po 
+		left join delivery_address da on po.delivery_address_id = da.delivery_address_id 
+		left join doctor d on d.doctor_id = po.creater 
+		where po.flag = 1 and po.purchase_order_id = #{purchaseOrderId}
+	</select>
+	
+	<insert id="insertPurchaseOrder" parameterType="com.hm.his.module.purchase.model.PurchaseOrder" useGeneratedKeys="true" keyProperty="purchaseOrderId">
+		insert into 
+			purchase_order 
+				(
+					purchase_order_number, status, remark, message, delivery_address_id, creater, create_date, designated, flag
+				)
+			values 
+				(
+					#{purchaseOrderNumber}, 1, #{remark}, #{message}, #{deliveryAddressId}, #{creater}, #{createDate}, #{designated}, 1
+				)
+	</insert>
+	
+	<update id="updatePurchaseOrder" parameterType="com.hm.his.module.purchase.model.PurchaseOrder">
+		update purchase_order
+		<set>
+			purchase_order_number = #{purchaseOrderNumber},
+			status = #{status},
+			remark = #{remark},
+			message = #{message},
+			delivery_address_id = #{deliveryAddressId},
+			designated = #{designated}
+		</set>
+		where purchase_order_id = #{purchaseOrderId}
+	</update>
+	
+	<!-- 取消采购订单 -->
+	<update id="cancelPurchaseOrder">
+		update purchase_order
+		<set>
+			status = 0
+		</set>
+		where purchase_order_id = #{purchaseOrderId}
+	</update>
+	
+	<!-- 更新采购订单状态 -->
+	<update id="updatePurchaseOrderStatus">
+		update purchase_order
+		<set>
+			status = #{status}
+		</set>
+		where purchase_order_id = #{purchaseOrderId}
+	</update>
+	
+	<!-- 确定供货商 -->
+	<update id="confirmSupplier">
+		update purchase_quote_relation
+		<set>
+			status = 2
+		</set>
+		where purchase_order_id = #{purchaseOrderId} and quote_order_id = #{quoteOrderId}
+	</update>
+	
+	<!-- 供货单缺货总数 -->
+	<select id="getOutOfStockSpecies" resultType="java.lang.Integer">
+		select count(quote_order_drug_id) from quote_order_drug where purchase_quantity>supply_quantity and quote_order_id = #{quoteOrderId}
+	</select>
+	
+	<!-- 订单被取消,更新供货单状态 -->
+	<update id="updateQuoteOrderByCancelOrder">
+		UPDATE quote_order
+		SET
+			status = 5
+		WHERE quote_order_id in (select quote_order_id from purchase_quote_relation where purchase_order_id = #{purchaseOrderId} and status = 1);
+	</update> 
+	
+	<!-- 诊所选中供货商后，取消其他供货商 -->
+	<update id="cancelOtherSupplier">
+		UPDATE quote_order
+		SET
+			status = 5
+		WHERE quote_order_id in (select quote_order_id from purchase_quote_relation where purchase_order_id = #{purchaseOrderId} and status = 1);
+	</update> 
+</mapper>

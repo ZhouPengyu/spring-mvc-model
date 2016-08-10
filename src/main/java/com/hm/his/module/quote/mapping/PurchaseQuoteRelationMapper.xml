@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.quote.dao.PurchaseQuoteRelationMapper">
+	<resultMap id="purQuoRelationResultMap"
+		type="com.hm.his.module.quote.model.PurchaseQuoteRelation">
+		<id column="pur_quo_relation_id" property="purQuoRelationId" jdbcType="INTEGER" />
+		<result column="purchase_order_id" property="purchaseOrderId" jdbcType="INTEGER" />
+		<result column="quote_order_id" property="quoteOrderId" jdbcType="INTEGER" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+	</resultMap>
+	<insert id="insertPurQuoRealtion" parameterType="com.hm.his.module.quote.model.PurchaseQuoteRelation">
+		insert into 
+			purchase_quote_relation 
+				(purchase_order_id, quote_order_id, status)
+			values 
+				(#{purchaseOrderId}, #{quoteOrderId}, #{status})
+	</insert>
+	<update id="updatePurQuoRealtion" parameterType="com.hm.his.module.quote.model.PurchaseQuoteRelation">
+		update purchase_quote_relation
+		<set>
+			purchase_order_id = #{purchaseOrderId},
+			quote_order_id = #{quoteOrderId},
+			status = #{status}
+		</set>
+		where pur_quo_relation_id = #{purQuoRelationId}
+	</update>
+	<update id="updatePurQuoRealtionStatus" parameterType="com.hm.his.module.quote.model.PurchaseQuoteRelation">
+		update purchase_quote_relation
+		<set>
+			status = #{status}
+		</set>
+		where
+		purchase_order_id = #{purchaseOrderId}
+		AND quote_order_id = #{quoteOrderId}
+	</update>
+</mapper>

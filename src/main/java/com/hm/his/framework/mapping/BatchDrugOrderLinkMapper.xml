@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.instock.dao.BatchDrugOrderLinkMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="order_drug_id" property="orderDrugId" jdbcType="INTEGER" />
+    <result column="drug_id" property="drugId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="batch_id" property="batchId" jdbcType="INTEGER" />
+    <result column="purchase_price" property="purchasePrice" jdbcType="DOUBLE" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="sale_unit" property="saleUnit" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, order_drug_id, drug_id, status, batch_id, purchase_price, amount, sale_unit
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from batch_drug_order_link
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByDrugIdAndOrderId" resultMap="BaseResultMap" parameterType="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    select
+    <include refid="Base_Column_List" />
+    from batch_drug_order_link where status=1 and drug_id=#{drugId,jdbcType=INTEGER} and order_drug_id=#{orderDrugId,jdbcType=INTEGER}
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from batch_drug_order_link
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    insert into batch_drug_order_link (id, order_drug_id, drug_id, 
+      status, batch_id, purchase_price, 
+      amount, sale_unit)
+    values (#{id,jdbcType=INTEGER}, #{orderDrugId,jdbcType=INTEGER}, #{drugId,jdbcType=INTEGER}, 
+      #{status,jdbcType=INTEGER}, #{batchId,jdbcType=INTEGER}, #{purchasePrice,jdbcType=DOUBLE}, 
+      #{amount,jdbcType=DOUBLE}, #{saleUnit,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    insert into batch_drug_order_link
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="orderDrugId != null" >
+        order_drug_id,
+      </if>
+      <if test="drugId != null" >
+        drug_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="batchId != null" >
+        batch_id,
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="saleUnit != null" >
+        sale_unit,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="orderDrugId != null" >
+        #{orderDrugId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="batchId != null" >
+        #{batchId,jdbcType=INTEGER},
+      </if>
+      <if test="purchasePrice != null" >
+        #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="saleUnit != null" >
+        #{saleUnit,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    update batch_drug_order_link
+    <set >
+      <if test="orderDrugId != null" >
+        order_drug_id = #{orderDrugId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        drug_id = #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="batchId != null" >
+        batch_id = #{batchId,jdbcType=INTEGER},
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+      <if test="saleUnit != null" >
+        sale_unit = #{saleUnit,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.instock.model.BatchDrugOrderLink" >
+    update batch_drug_order_link
+    set order_drug_id = #{orderDrugId,jdbcType=INTEGER},
+      drug_id = #{drugId,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      batch_id = #{batchId,jdbcType=INTEGER},
+      purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      amount = #{amount,jdbcType=DOUBLE},
+      sale_unit = #{saleUnit,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

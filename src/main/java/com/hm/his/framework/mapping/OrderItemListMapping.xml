@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.order.dao.OrderItemListMapper">
+	<resultMap id="BaseResultMap" type="com.hm.his.module.order.model.OrderItemList">
+		<id column="id" property="id" />
+		<result column="create_date" property="createDate" />
+		<result column="foreign_id" property="foreignId" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="order_no" property="orderNo" />
+		<result column="type" property="type" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="receivable_amt" property="receivableAmt" />
+		<result column="record_id" property="recordId" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, create_date, foreign_id, modify_date, order_no,
+		type,charge_status,receivable_amt,record_id
+	</sql>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where id = #{id}
+	</select>
+	<select id="selectByOrderNo" resultMap="BaseResultMap"
+		parameterType="java.lang.String">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where order_no=#{orderNo}
+	</select>
+	<select id="selectByOrderNoAndForeignId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where order_no=#{orderNo} and
+		foreign_id=#{foreignId}
+	</select>
+	<select id="selectByRecordIdAndForeignId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where record_id=#{recordId} and
+		foreign_id=#{foreignId}
+	</select>
+	<select id="selectByRecordIdAndType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where record_id=#{recordId} and type=#{type}
+	</select>
+	<select id="selectByRecordId" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where record_id=#{recordId}
+	</select>
+	<select id="selectByOrderNoAndChargeStatus" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_list
+		where order_no=#{orderNo}
+		<![CDATA[ and charge_status & #{chargeStatus}>0 ]]>
+	</select>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from order_item_list
+		where id = #{id}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.OrderItemList"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into order_item_list (
+		foreign_id,
+		order_no, type,charge_status,receivable_amt,record_id
+		)
+		values (
+		#{foreignId},
+		#{orderNo}, #{type}, #{chargeStatus},
+		#{receivableAmt}, #{recordId}
+		)
+	</insert>
+	<insert id="insertList" parameterType="java.util.List">
+		insert into order_item_list ( foreign_id,
+		order_no,
+		type,charge_status,receivable_amt,record_id
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			( #{item.foreignId},
+			#{item.orderNo}, #{item.type},
+			#{item.chargeStatus}, #{receivableAmt}, #{recordId}
+			)
+		</foreach>
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as id
+		</selectKey>
+	</insert>
+	<update id="update" parameterType="com.hm.his.module.order.model.OrderItemList">
+		update order_item_list
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="updateOrderItemListChargeSatus">
+		update
+		order_item_list set
+		charge_status=#{chargeStatus}
+		where id = #{id}
+	</update>
+	<sql id="setSql">
+		<if test="createDate != null">
+			create_date = #{createDate},
+		</if>
+		<if test="foreignId != null">
+			foreign_id = #{foreignId},
+		</if>
+		<if test="modifyDate != null">
+			modify_date = #{modifyDate},
+		</if>
+		<if test="orderNo != null">
+			order_no = #{orderNo},
+		</if>
+		<if test="chargeStatus != null">
+			charge_status = #{chargeStatus},
+		</if>
+		<if test="type != null">
+			type = #{type},
+		</if>
+		<if test="receivableAmt != null">
+			receivable_amt = #{receivableAmt},
+		</if>
+		<if test="recordId != null">
+			record_id = #{recordId},
+		</if>
+	</sql>
+</mapper>

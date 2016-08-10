@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.order.dao.SellDrugRecordMapper">
+	<resultMap id="BaseResultMap" type="com.hm.his.module.order.model.SellDrugRecord">
+		<id column="id" property="id" />
+		<result column="age" property="age" />
+		<result column="age_type" property="ageType" />
+		<result column="create_date" property="createDate" />
+		<result column="creater" property="creater" />
+		<result column="gender" property="gender" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="patient_name" property="patientName" />
+		<result column="id_card_no" property="idCardNo" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="phone_no" property="phoneNo" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, age, age_type, create_date, creater, gender,
+		modify_date,
+		patient_name, id_card_no,hospital_id, phone_no
+	</sql>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from sell_drug_record
+		where id = #{id}
+	</select>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from sell_drug_record
+		where id = #{id}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.SellDrugRecord"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into sell_drug_record
+		( age,
+		age_type,
+		creater, gender,
+		modify_date, patient_name,
+		id_card_no,hospital_id,
+		phone_no
+		)
+		values ( #{age}, #{ageType},
+		#{creater},
+		#{gender},
+		#{modifyDate},
+		#{patientName}, #{idCardNo}, #{hospitalId}, #{phoneNo}
+		)
+	</insert>
+	<update id="update" parameterType="com.hm.his.module.order.model.SellDrugRecord">
+		update sell_drug_record
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where id = #{id}
+	</update>
+	<sql id="setSql">
+		<if test="age != null">
+			age = #{age},
+		</if>
+		<if test="ageType != null">
+			age_type = #{ageType},
+		</if>
+		<if test="createDate != null">
+			create_date = #{createDate},
+		</if>
+		<if test="creater != null">
+			creater = #{creater},
+		</if>
+		<if test="gender != null">
+			gender = #{gender},
+		</if>
+		<if test="modifyDate != null">
+			modify_date = #{modifyDate},
+		</if>
+		<if test="patientName != null">
+			patient_name = #{patientName},
+		</if>
+		<if test="idCardNo != null">
+			id_card_no = #{idCardNo},
+		</if>
+		<if test="hospitalId != null">
+			hospital_id = #{hospitalId},
+		</if>
+		<if test="phoneNo != null">
+			phone_no = #{phoneNo},
+		</if>
+	</sql>
+</mapper>

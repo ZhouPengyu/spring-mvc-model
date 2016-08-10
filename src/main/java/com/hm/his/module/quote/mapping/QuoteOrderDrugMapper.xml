@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.quote.dao.QuoteOrderDrugMapper">
+	<resultMap id="quoteOrderDrugResultMap" type="com.hm.his.module.quote.model.QuoteOrderDrug">
+		<id column="quote_order_drug_id" property="quoteOrderDrugId" jdbcType="INTEGER" />
+		<result column="quote_order_id" property="quoteOrderId" jdbcType="INTEGER" />
+		<result column="drug_id" property="drugId" jdbcType="INTEGER" />
+		<result column="drug_name" property="drugName" jdbcType="VARCHAR" />
+		<result column="drug_specification" property="drugSpecification" jdbcType="VARCHAR" />
+		<result column="purchase_drug_manufacturers" property="purchaseDrugManufacturers" jdbcType="VARCHAR" />
+		<result column="supply_drug_manufacturers" property="supplyDrugManufacturers" jdbcType="VARCHAR" />
+		<result column="purchase_quantity" property="purchaseQuantity" jdbcType="INTEGER" />
+		<result column="package_unit" property="packageUnit" jdbcType="VARCHAR" />
+		<result column="supply_quantity" property="supplyQuantity" jdbcType="INTEGER" />
+		<result column="unit_price" property="unitPrice" jdbcType="DOUBLE" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		quote_order_drug_id, quote_order_id, drug_id, drug_name, drug_specification,
+		purchase_drug_manufacturers, supply_drug_manufacturers, purchase_quantity, package_unit, supply_quantity, unit_price
+	</sql>
+	<insert id="insertQuoteDrug" parameterType="com.hm.his.module.quote.model.QuoteOrderDrug" useGeneratedKeys="true" keyProperty="quoteOrderDrugId">
+		insert into 
+			quote_order_drug 
+				(	
+					quote_order_id, drug_id, drug_name, drug_specification, 
+					purchase_drug_manufacturers, supply_drug_manufacturers, purchase_quantity, 
+					package_unit, supply_quantity, unit_price
+				)
+			values 
+				(
+					#{quoteOrderId}, #{drugId}, #{drugName}, #{drugSpecification}, 
+					#{purchaseDrugManufacturers}, #{supplyDrugManufacturers}, #{purchaseQuantity}, 
+					#{packageUnit}, #{supplyQuantity}, #{unitPrice}
+				)
+	</insert>
+	<update id="updateQuoteOrderDrug" parameterType="com.hm.his.module.quote.model.QuoteOrderDrug">
+		update quote_order_drug
+		<set>
+			<if test="quoteOrderId != null">
+				quote_order_id = #{quoteOrderId},
+			</if>
+			<if test="drugId != null">
+				drug_id = #{drugId},
+			</if>
+			<if test="drugName != null and drugName != ''">
+				drug_name = #{drugName},
+			</if>
+			<if test="drugSpecification != null and drugSpecification != ''">
+				drug_specification = #{drugSpecification},
+			</if>
+			<if test="purchaseDrugManufacturers != null and purchaseDrugManufacturers != ''">
+				purchase_drug_manufacturers = #{purchaseDrugManufacturers},
+			</if>
+			<if test="supplyDrugManufacturers != null and supplyDrugManufacturers != ''">
+				supply_drug_manufacturers = #{supplyDrugManufacturers},
+			</if>
+			<if test="purchaseQuantity != null and purchaseQuantity != ''">
+				purchase_quantity = #{purchaseQuantity},
+			</if>
+			<if test="packageUnit != null and packageUnit != ''">
+				package_unit = #{packageUnit},
+			</if>
+			<if test="supplyQuantity != null">
+				supply_quantity = #{supplyQuantity},
+			</if>
+			<if test="unitPrice != null">
+				unit_price = #{unitPrice}
+			</if>
+		</set>
+		where quote_order_drug_id = #{quoteOrderDrugId}
+	</update>
+
+	<select id="getQuoteOrderDrugDetail" parameterType="com.hm.his.module.quote.model.QuoteOrderDrug" resultMap="quoteOrderDrugResultMap">
+		SELECT
+		<include refid="Base_Column_List"/>
+		FROM quote_order_drug
+		WHERE 1 = 1
+		<if test="quoteOrderId != null">
+			and quote_order_id = #{quoteOrderId}
+		</if>
+		<if test="drugId != null">
+			and drug_id = #{drugId}
+		</if>
+	</select>
+
+
+	<select id="queryQuoteDrugPrimaryKey" parameterType="com.hm.his.module.quote.model.QuoteOrderDrug" resultType="java.lang.Integer">
+		SELECT quote_order_drug_id
+		FROM quote_order_drug
+		WHERE 1 = 1
+		<if test="quoteOrderId != null">
+			and quote_order_id = #{quoteOrderId}
+		</if>
+		<if test="drugId != null">
+			and drug_id = #{drugId}
+		</if>
+		ORDER BY create_date DESC
+		LIMIT 1
+	</select>
+
+	<select id="getQuoteOrderDrug" parameterType="java.lang.Integer" resultMap="quoteOrderDrugResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM quote_order_drug
+		WHERE quote_order_id=#{quoteOrderId}
+	</select>
+
+
+	<!--QuoteOrderDrugRecord-->
+	<insert id="insertQuoteOrderDrugRecord" parameterType="com.hm.his.module.quote.model.QuoteOrderDrug" useGeneratedKeys="true" keyProperty="quoteOrderDrugId">
+		insert into
+		quote_order_drug_record
+		(
+		quote_order_drug_id, quote_order_id, drug_id, drug_name, drug_specification,
+		purchase_drug_manufacturers, supply_drug_manufacturers, purchase_quantity,
+		package_unit, supply_quantity, unit_price
+		)
+		values
+		(
+		#{quoteOrderDrugId}, #{quoteOrderId}, #{drugId}, #{drugName}, #{drugSpecification},
+		#{purchaseDrugManufacturers}, #{supplyDrugManufacturers}, #{purchaseQuantity},
+		#{packageUnit}, #{supplyQuantity}, #{unitPrice}
+		)
+	</insert>
+	<!--RecordEnd-->
+</mapper>

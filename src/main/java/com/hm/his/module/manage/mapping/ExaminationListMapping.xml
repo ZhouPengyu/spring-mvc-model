@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.manage.dao.ExaminationListMapper">
+	<resultMap id="examinationListMap" type="com.hm.his.module.manage.model.ExaminationList">
+		<result column="exam_list_id" property="examId" />
+		<result column="exam_type" property="examType" />
+		<result column="exam_name" property="examName" />
+		<result column="effective_duration" property="effectiveDuration" />
+		<result column="exam_describe" property="examDescribe" />
+		<result column="exam_site" property="examSite" />
+		<result column="query_indexpyall" property="queryIndexpyall" />
+		<result column="query_indexpysimple" property="queryIndexpysimple" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+	</resultMap>
+
+	<select id="searchByName" resultMap="examinationListMap">
+		SELECT exam_list_id, exam_name FROM examination_list
+			WHERE exam_name like CONCAT(CONCAT('%', #{examName}), '%') 
+				or query_indexpyall like CONCAT(CONCAT('%', #{examName}), '%') 
+				or query_indexpysimple like CONCAT(CONCAT('%', #{examName}), '%') 
+			order by length(exam_name) asc limit 10
+	</select>
+
+</mapper>

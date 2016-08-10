@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.instock.dao.BatchInstockMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.instock.model.BatchInstock" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="batch_no" property="batchNo" jdbcType="VARCHAR" />
+    <result column="supplier" property="supplier" jdbcType="VARCHAR" />
+    <result column="supplier_phone_no" property="supplierPhoneNo" jdbcType="VARCHAR" />
+    <result column="purchase_order_id" property="purchaseOrderId" jdbcType="INTEGER" />
+    <result column="total_price" property="totalPrice" jdbcType="DOUBLE" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+    <result column="creater" property="creater" jdbcType="INTEGER" />
+    <result column="modifier" property="modifier" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, batch_no, supplier, supplier_phone_no, purchase_order_id, total_price,
+    create_date, modify_date, creater, modifier
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from batch_instock
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+
+  <select id="searchCurrentDateBiggestBatchNo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+     from batch_instock where hospital_id=#{hospitalId} and create_date > date_format(now(),'%y-%m-%d')  order by batch_no desc LIMIT 1
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from batch_instock
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.instock.model.BatchInstock"  useGeneratedKeys="true" keyProperty="id">
+    insert into batch_instock (id, hospital_id, batch_no,
+    supplier, supplier_phone_no, purchase_order_id,
+    total_price,
+    creater, modifier)
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{batchNo,jdbcType=VARCHAR},
+    #{supplier,jdbcType=VARCHAR}, #{supplierPhoneNo,jdbcType=VARCHAR}, #{purchaseOrderId,jdbcType=INTEGER},
+    #{totalPrice,jdbcType=DOUBLE},
+    #{creater,jdbcType=INTEGER}, #{modifier,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.instock.model.BatchInstock"  useGeneratedKeys="true" keyProperty="id">
+    insert into batch_instock
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="batchNo != null" >
+        batch_no,
+      </if>
+      <if test="supplier != null" >
+        supplier,
+      </if>
+      <if test="supplierPhoneNo != null" >
+        supplier_phone_no,
+      </if>
+      <if test="purchaseOrderId != null" >
+        purchase_order_id,
+      </if>
+      <if test="totalPrice != null" >
+        total_price,
+      </if>
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="modifier != null" >
+        modifier,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="batchNo != null" >
+        #{batchNo,jdbcType=VARCHAR},
+      </if>
+      <if test="supplier != null" >
+        #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierPhoneNo != null" >
+        #{supplierPhoneNo,jdbcType=VARCHAR},
+      </if>
+      <if test="purchaseOrderId != null" >
+        #{purchaseOrderId,jdbcType=INTEGER},
+      </if>
+      <if test="totalPrice != null" >
+        #{totalPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.instock.model.BatchInstock" >
+    update batch_instock
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="batchNo != null" >
+        batch_no = #{batchNo,jdbcType=VARCHAR},
+      </if>
+      <if test="supplier != null" >
+        supplier = #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierPhoneNo != null" >
+        supplier_phone_no = #{supplierPhoneNo,jdbcType=VARCHAR},
+      </if>
+      <if test="purchaseOrderId != null" >
+        purchase_order_id = #{purchaseOrderId,jdbcType=INTEGER},
+      </if>
+      <if test="totalPrice != null" >
+        total_price = #{totalPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        modifier = #{modifier,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.instock.model.BatchInstock" >
+    update batch_instock
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+    batch_no = #{batchNo,jdbcType=VARCHAR},
+    supplier = #{supplier,jdbcType=VARCHAR},
+    supplier_phone_no = #{supplierPhoneNo,jdbcType=VARCHAR},
+    purchase_order_id = #{purchaseOrderId,jdbcType=INTEGER},
+    total_price = #{totalPrice,jdbcType=DOUBLE},
+    creater = #{creater,jdbcType=INTEGER},
+    modifier = #{modifier,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

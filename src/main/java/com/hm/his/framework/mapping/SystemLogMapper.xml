@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.log.dao.SystemLogMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.log.model.SystemLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="doctor_id" property="doctorId" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="hospital_name" property="hospitalName" jdbcType="VARCHAR" />
+    <result column="login_ip" property="loginIp" jdbcType="VARCHAR" />
+    <result column="operation_id" property="operationId" jdbcType="INTEGER" />
+    <result column="function_id" property="functionId" jdbcType="INTEGER" />
+    <result column="operation_result" property="operationResult" jdbcType="INTEGER" />
+    <result column="oper_obj_id" property="operObjId" jdbcType="INTEGER" />
+    <result column="oper_obj_name" property="operObjName" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="creater" property="creater" jdbcType="INTEGER" />
+    <result column="params" property="params" jdbcType="LONGVARCHAR" />
+    <result column="description" property="description" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.hm.his.module.log.model.SystemLog" extends="BaseResultMap" >
+    <result column="params" property="params" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, doctor_id, user_name, hospital_name, login_ip, operation_id, function_id, 
+    operation_result, oper_obj_id, oper_obj_name, create_date, creater
+  </sql>
+  <sql id="Blob_Column_List" >
+    params
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from system_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from system_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.log.model.SystemLog" >
+    insert into system_log (id, hospital_id, doctor_id, 
+      user_name, hospital_name, login_ip, 
+      operation_id, function_id, operation_result, 
+      oper_obj_id, oper_obj_name, create_date, 
+      creater, params , description)
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{doctorId,jdbcType=INTEGER}, 
+      #{userName,jdbcType=VARCHAR}, #{hospitalName,jdbcType=VARCHAR}, #{loginIp,jdbcType=VARCHAR}, 
+      #{operationId,jdbcType=INTEGER}, #{functionId,jdbcType=INTEGER}, #{operationResult,jdbcType=INTEGER}, 
+      #{operObjId,jdbcType=INTEGER}, #{operObjName,jdbcType=VARCHAR}, #{createDate,jdbcType=TIMESTAMP},
+      #{creater,jdbcType=INTEGER}, #{params,jdbcType=LONGVARCHAR}, #{description,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.log.model.SystemLog" >
+    insert into system_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="doctorId != null" >
+        doctor_id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="hospitalName != null" >
+        hospital_name,
+      </if>
+      <if test="loginIp != null" >
+        login_ip,
+      </if>
+      <if test="operationId != null" >
+        operation_id,
+      </if>
+      <if test="functionId != null" >
+        function_id,
+      </if>
+      <if test="operationResult != null" >
+        operation_result,
+      </if>
+      <if test="operObjId != null" >
+        oper_obj_id,
+      </if>
+      <if test="operObjName != null" >
+        oper_obj_name,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="params != null" >
+        params,
+      </if>
+      <if test="description != null" >
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="doctorId != null" >
+        #{doctorId,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalName != null" >
+        #{hospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="loginIp != null" >
+        #{loginIp,jdbcType=VARCHAR},
+      </if>
+      <if test="operationId != null" >
+        #{operationId,jdbcType=INTEGER},
+      </if>
+      <if test="functionId != null" >
+        #{functionId,jdbcType=INTEGER},
+      </if>
+      <if test="operationResult != null" >
+        #{operationResult,jdbcType=INTEGER},
+      </if>
+      <if test="operObjId != null" >
+        #{operObjId,jdbcType=INTEGER},
+      </if>
+      <if test="operObjName != null" >
+        #{operObjName,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="params != null" >
+        #{params,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.log.model.SystemLog" >
+    update system_log
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="doctorId != null" >
+        doctor_id = #{doctorId,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="hospitalName != null" >
+        hospital_name = #{hospitalName,jdbcType=VARCHAR},
+      </if>
+      <if test="loginIp != null" >
+        login_ip = #{loginIp,jdbcType=VARCHAR},
+      </if>
+      <if test="operationId != null" >
+        operation_id = #{operationId,jdbcType=INTEGER},
+      </if>
+      <if test="functionId != null" >
+        function_id = #{functionId,jdbcType=INTEGER},
+      </if>
+      <if test="operationResult != null" >
+        operation_result = #{operationResult,jdbcType=INTEGER},
+      </if>
+      <if test="operObjId != null" >
+        oper_obj_id = #{operObjId,jdbcType=INTEGER},
+      </if>
+      <if test="operObjName != null" >
+        oper_obj_name = #{operObjName,jdbcType=VARCHAR},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="params != null" >
+        params = #{params,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="description != null" >
+        #{description,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.hm.his.module.log.model.SystemLog" >
+    update system_log
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+      doctor_id = #{doctorId,jdbcType=INTEGER},
+      user_name = #{userName,jdbcType=VARCHAR},
+      hospital_name = #{hospitalName,jdbcType=VARCHAR},
+      login_ip = #{loginIp,jdbcType=VARCHAR},
+      operation_id = #{operationId,jdbcType=INTEGER},
+      function_id = #{functionId,jdbcType=INTEGER},
+      operation_result = #{operationResult,jdbcType=INTEGER},
+      oper_obj_id = #{operObjId,jdbcType=INTEGER},
+      oper_obj_name = #{operObjName,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      creater = #{creater,jdbcType=INTEGER},
+      params = #{params,jdbcType=LONGVARCHAR},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.log.model.SystemLog" >
+    update system_log
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+      doctor_id = #{doctorId,jdbcType=INTEGER},
+      user_name = #{userName,jdbcType=VARCHAR},
+      hospital_name = #{hospitalName,jdbcType=VARCHAR},
+      login_ip = #{loginIp,jdbcType=VARCHAR},
+      operation_id = #{operationId,jdbcType=INTEGER},
+      function_id = #{functionId,jdbcType=INTEGER},
+      operation_result = #{operationResult,jdbcType=INTEGER},
+      oper_obj_id = #{operObjId,jdbcType=INTEGER},
+      oper_obj_name = #{operObjName,jdbcType=VARCHAR},
+      create_date = #{createDate,jdbcType=TIMESTAMP},
+      creater = #{creater,jdbcType=INTEGER},
+      params = #{params,jdbcType=LONGVARCHAR},
+      description = #{description,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

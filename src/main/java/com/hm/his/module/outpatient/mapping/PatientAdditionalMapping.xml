@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientAdditionalMapper">
+	<resultMap id="patientResultMap" type="com.hm.his.module.outpatient.model.PatientAdditional">
+		<result column="additional_id" property="additionalId" />
+		<result column="additional_name" property="additionalName" />
+		<result column="additional_price" property="additionalPrice" />
+		<result column="record_id" property="recordId" />
+		<result column="flag" property="flag" />
+	</resultMap>
+
+	<select id="searchPatientAdditional" resultMap="patientResultMap" parameterType="com.hm.his.module.outpatient.model.PatientAdditional">
+		SELECT additional_id,additional_name,additional_price,record_id,flag 
+		FROM patient_additional where 1=1
+		<if test="recordId != null and recordId != 0">
+			and record_id = #{recordId}
+		</if>
+		and flag = 1
+	</select>
+
+	<insert id="insertPatientAdditional" parameterType="com.hm.his.module.outpatient.model.PatientAdditional" useGeneratedKeys="true" keyProperty="additionalId">
+		INSERT INTO patient_additional (additional_name, additional_price, record_id, flag)
+		VALUES (#{additionalName}, #{additionalPrice}, #{recordId}, #{flag});
+	</insert>
+	<insert id="insertPatientAdditionalList" parameterType="com.hm.his.module.outpatient.model.PatientAdditional" useGeneratedKeys="true" keyProperty="additionalId">
+		INSERT INTO patient_additional (additional_name, additional_price, record_id, flag)
+		VALUES
+
+		<foreach collection="list" item="item" index="index"
+				 separator=",">
+			(
+			#{item.additionalName}, #{item.additionalPrice}, #{item.recordId}, #{item.flag}
+			)
+		</foreach>
+
+
+	</insert>
+
+
+
+	<update id="updatePatientAdditional" parameterType="com.hm.his.module.outpatient.model.PatientAdditional">
+		UPDATE patient_additional
+		<set>
+			additional_name = #{additionalName},
+			additional_price = #{additionalPrice},
+			record_id = #{recordId},
+			flag = #{flag}
+		</set>
+		WHERE additional_id = #{additionalId}
+	</update>
+	
+	<update id="deletePatientAdditional">
+		UPDATE patient_additional SET flag = 0 WHERE additional_id = #{additional_id}
+	</update>
+	
+	<update id="delAdditionalByRecordId">
+		UPDATE patient_additional SET flag = 0 WHERE record_id = #{recordId}
+	</update>
+
+</mapper>

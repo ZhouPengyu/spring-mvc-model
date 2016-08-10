@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hm.his.module.order.dao.HospitalOrderMapper">
+	<resultMap id="BaseResultMap" type="com.hm.his.module.order.model.HospitalOrder">
+		<id column="order_no" property="orderNo" />
+		<result column="actual_amt" property="actualAmt" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="create_date" property="createDate" />
+		<result column="creater" property="creater" />
+		<result column="modifier" property="modifier" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="last_charge_id" property="lastChargeId" />
+		<result column="last_charge_date" property="lastChargeDate" />
+		<result column="last_refund_id" property="lastRefundId" />
+		<result column="last_refund_date" property="lastRefundDate" />
+		<result column="order_status" property="orderStatus" />
+		<result column="order_type" property="orderType" />
+		<result column="patient_name" property="patientName" />
+		<result column="patient_id" property="patientId" />
+		<result column="patient_record_id" property="patientRecordId" />
+		<result column="receivable_amt" property="receivableAmt" />
+		<result column="total_receivable_amt" property="totalReceivableAmt" />
+		<result column="refund_amt" property="refundAmt" />
+		<result column="sell_drug_record_id" property="sellDrugRecordId" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="record_version" property="recordVersion" />
+		<result column="discount" property="discount" />
+		<result column="pay_mode" property="payMode" />
+	</resultMap>
+
+	<resultMap id="OrderStatisticsItemPojoMap"
+		type="com.hm.his.module.statistics.pojo.OrderStatisticsItemPojo">
+		<id column="order_no" property="orderNo" />
+		<result column="order_type" property="orderType" />
+		<result column="patient_name" property="patientName" />
+		<result column="patient_id" property="patientId" />
+		<!-- <result column="gender" property="gender" /> -->
+		<result column="patient_record_id" property="recordId" />
+		<result column="sell_drug_record_id" property="sellDrugRecordId" />
+		<result column="pay_mode" property="payMode" />
+		<!-- <result column="age" property="age" /> <result column="age_type" property="ageType" 
+			/> <result column="phone_no" property="phoneNo" /> -->
+		<result column="real_name" property="doctorName" />
+		<result column="diagnosis" property="diagnosis" />
+		<result column="last_charge_date" property="chargeDate" />
+
+		<result column="orderReceivableAmtAmt" property="orderReceivableAmtAmt" />
+		<result column="orderTotalReceivableAmtAmt" property="orderTotalReceivableAmtAmt" />
+		<result column="orderRefundReceivableAmtAmt" property="orderRefundReceivableAmtAmt" />
+		<result column="orderActualAmt" property="orderActualAmt" />
+		<result column="orderRefundAmt" property="orderRefundAmt" />
+		<result column="patientInfo" property="patientInfo" />
+
+	</resultMap>
+	<resultMap id="OrderTotalAmtPojoMap"
+		type="com.hm.his.module.order.pojo.OrderTotalAmtPojo">
+		<result column="totalAlreadyReceivableAmt" property="totalAlreadyReceivableAmt" />
+		<result column="totalFinalActualAmt" property="totalFinalActualAmt" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		order_no, actual_amt, charge_status, create_date, creater,
+		modifier,
+		modify_date,
+		order_status, order_type, patient_name,
+		patient_id, patient_record_id,
+		total_receivable_amt,
+		receivable_amt,
+		refund_amt,
+		sell_drug_record_id, hospital_id,
+		last_charge_id,
+		last_charge_date,
+		last_refund_id,
+		last_refund_date,
+		record_version,
+		discount,
+		pay_mode
+	</sql>
+
+	<select id="selectByOrderNo" parameterType="java.lang.String"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hospital_order
+		where order_no = #{orderNo}
+	</select>
+	<select id="selectByRecordId" parameterType="java.lang.Long"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hospital_order
+		where patient_record_id = #{recordId}
+	</select>
+	<select id="selectHospitalOrders" parameterType="com.hm.his.module.order.pojo.GetOrderListParam"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from hospital_order t where exists (select order_no from
+		order_item_list where order_no=t.order_no)
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="chargeStatus!=null">
+			<![CDATA[ and charge_status & #{chargeStatus}>0 ]]>
+		</if>
+		<if test="doctorId!=null">
+			and creater=#{doctorId}
+		</if>
+		<if test="orderColumn=='create_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and create_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and create_date <= #{endDate} ]]>
+			</if>
+			order by create_date desc
+		</if>
+		<if test="orderColumn=='last_charge_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and last_charge_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and last_charge_date <= #{endDate} ]]>
+			</if>
+			order by last_charge_date desc
+		</if>
+		<if test="orderColumn=='last_refund_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and last_refund_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and last_refund_date <= #{endDate} ]]>
+			</if>
+			order by last_refund_date desc
+		</if>
+		<if test="startRecord!=null and pageSize!=null">
+			limit #{startRecord},#{pageSize}
+		</if>
+	</select>
+	<delete id="delete" parameterType="java.lang.String"> delete from hospital_order
+		where order_no = #{orderNo}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.HospitalOrder">
+		insert into hospital_order
+		(order_no, actual_amt, charge_status,
+		creater, modifier,
+		order_status,
+		order_type,
+		patient_name, patient_id,
+		patient_record_id,
+		receivable_amt,
+		total_receivable_amt,
+		refund_amt,
+		sell_drug_record_id,
+		hospital_id,
+		last_charge_id,
+		last_charge_date,
+		last_refund_id,
+		last_refund_date,
+		record_version,
+		discount,
+		pay_mode)
+		values (#{orderNo},
+		#{actualAmt},
+		#{chargeStatus},
+		#{creater},
+		#{modifier},
+		#{orderStatus},
+		#{orderType},
+		#{patientName},
+		#{patientId},
+		#{patientRecordId},
+		#{receivableAmt},
+		#{totalReceivableAmt},
+		#{refundAmt},
+		#{sellDrugRecordId},
+		#{hospitalId},
+		#{lastChargeId},
+		#{lastChargeDate},
+		#{lastRefundId},
+		#{lastRefundDate},
+		#{recordVersion},
+		#{discount},
+		#{payMode}
+		)
+	</insert>
+	<update id="update" parameterType="com.hm.his.module.order.model.HospitalOrder">
+		update hospital_order
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where order_no = #{orderNo}
+	</update>
+	<update id="updateRecordVersion" parameterType="com.hm.his.module.order.model.HospitalOrder">
+		update hospital_order set record_version=#{recordVersion} where 1=1
+		<if test="patientRecordId != null">
+			and patient_record_id = #{patientRecordId}
+		</if>
+		<if test="orderNo != null">
+			and order_no = #{orderNo}
+		</if>
+	</update>
+	<update id="updateByRecordId" parameterType="com.hm.his.module.order.model.HospitalOrder">
+		update hospital_order
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where patient_record_id = #{patientRecordId}
+	</update>
+	<select id="selectHospitalOrderCount" resultType="Integer"
+		parameterType="com.hm.his.module.order.pojo.GetOrderListParam">
+		select count(*) from hospital_order t where exists (select order_no
+		from order_item_list where order_no=t.order_no)
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="chargeStatus!=null">
+			<![CDATA[ and charge_status & #{chargeStatus}>0 ]]>
+		</if>
+		<if test="orderColumn=='create_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and create_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and create_date <= #{endDate} ]]>
+			</if>
+			<if test="doctorId!=null">
+				and creater=#{doctorId}
+			</if>
+		</if>
+		<if test="orderColumn=='last_charge_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and last_charge_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and last_charge_date <= #{endDate} ]]>
+			</if>
+			<if test="doctorId!=null">
+				and last_charge_id=#{doctorId}
+			</if>
+		</if>
+		<if test="orderColumn=='last_refund_date'">
+			<if test="startDate!=null">
+				<![CDATA[ and last_refund_date >= #{startDate} ]]>
+			</if>
+			<if test="endDate!=null">
+				<![CDATA[ and last_refund_date <= #{endDate} ]]>
+			</if>
+			<if test="doctorId!=null">
+				and last_refund_id=#{doctorId}
+			</if>
+		</if>
+	</select>
+	<select id="selectCountByCreater" resultType="java.lang.Integer">
+		select count(*)
+		from hospital_order where creater=#{creater}
+	</select>
+	<sql id="setSql">
+		<if test="actualAmt != null">
+			actual_amt = #{actualAmt},
+		</if>
+		<if test="chargeStatus != null">
+			charge_status = #{chargeStatus},
+		</if>
+		<if test="createDate != null">
+			create_date = #{createDate},
+		</if>
+		<if test="creater != null">
+			creater = #{creater},
+		</if>
+		<if test="modifier != null">
+			modifier = #{modifier},
+		</if>
+		<if test="modifyDate != null">
+			modify_date = #{modifyDate},
+		</if>
+		<if test="orderStatus != null">
+			order_status = #{orderStatus},
+		</if>
+		<if test="orderType != null">
+			order_type = #{orderType},
+		</if>
+		<if test="patientName != null">
+			patient_name = #{patientName},
+		</if>
+		<if test="patientId != null">
+			patient_id = #{patientId},
+		</if>
+		<if test="patientRecordId != null">
+			patient_record_id = #{patientRecordId},
+		</if>
+		<if test="receivableAmt != null">
+			receivable_amt = #{receivableAmt},
+		</if>
+		<if test="totalReceivableAmt != null">
+			total_receivable_amt = #{totalReceivableAmt},
+		</if>
+		<if test="refundAmt != null">
+			refund_amt = #{refundAmt},
+		</if>
+		<if test="sellDrugRecordId != null">
+			sell_drug_record_id = #{sellDrugRecordId},
+		</if>
+		<if test="hospitalId != null">
+			hospital_id = #{hospitalId},
+		</if>
+		<if test="lastChargeId != null">
+			last_charge_id = #{lastChargeId},
+		</if>
+		<if test="lastChargeDate != null">
+			last_charge_date = #{lastChargeDate},
+		</if>
+		<if test="lastRefundId != null">
+			last_refund_id = #{lastRefundId},
+		</if>
+		<if test="lastRefundDate != null">
+			last_refund_date = #{lastRefundDate},
+		</if>
+		<if test="discount != null">
+			discount = #{discount},
+		</if>
+		<if test="payMode != null">
+			pay_mode = #{payMode},
+		</if>
+		<if test="recordVersion != null">
+			record_version = #{recordVersion}
+		</if>
+	</sql>
+	<!-- 统计相关sql start -->
+	<select id="selectOrderStatisticsItemPojos" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultMap="BaseResultMap">
+		select * from hospital_order where 
+		<![CDATA[ charge_status & 2 >0 ]]>
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="doctorId!=null">
+			and creater=#{doctorId}
+		</if>
+		<if test="startDate!=null">
+			<![CDATA[ and modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+			<![CDATA[ and modify_date <= #{endDate} ]]>
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="phoneNo !=null">
+			and patient_id in (
+			select patient_id from patient where
+			phone_no like
+			CONCAT('%',#{phoneNo},'%')
+			)
+		</if>
+		<if test="diseaseName !=null">
+			and patient_record_id in (
+			select record_id from
+			diagnosis_result where
+			disease_name like CONCAT('%',#{diseaseName},'%')
+			<if test="hospitalId!=null">
+				and hospital_id=#{hospitalId}
+			</if>
+			)
+		</if>
+		<if test="payMode != null">
+			and pay_mode=#{payMode}
+		</if>
+	</select>
+	<!-- 门诊日志查询优化 -->
+	<select id="selectOrderStatisticsItemPojosByStatisticsRequest"
+		parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultMap="OrderStatisticsItemPojoMap">
+		select
+		ho.order_no,ho.order_type,ho.patient_name,ho.patient_id,ho.patient_record_id,ho.sell_drug_record_id,
+		ho.last_charge_date,d.real_name ,
+		ho.pay_mode,
+		case when
+		ho.order_type=1 then
+		CONCAT(ifnull(p.gender,''),',',ifnull(p.phone_no,''),',',ifnull(ii.age,''),',',ifnull(ii.age_type,''))
+		when ho.order_type=2 then
+		CONCAT(ifnull(sdr.gender,''),',',ifnull(sdr.phone_no,''),',',ifnull(sdr.age,''),',',ifnull(sdr.age_type,''))
+		end as patientInfo,
+		ho.receivable_amt orderReceivableAmtAmt,
+		ho.total_receivable_amt orderTotalReceivableAmtAmt,
+		ho.actual_amt
+		orderActualAmt,
+		ho.refund_amt orderRefundAmt
+		from hospital_order ho
+		left
+		join patient p on
+		ho.patient_id=p.patient_id
+		left join inquiry_info ii
+		on
+		ho.patient_record_id=ii.record_id
+		left join doctor d on
+		ho.creater=d.doctor_id
+		left join sell_drug_record sdr on
+		ho.sell_drug_record_id=sdr.id
+		where 
+		<![CDATA[ ho.charge_status & 2 >0 ]]>
+		<if test="hospitalId!=null">
+			and ho.hospital_id=#{hospitalId}
+		</if>
+		<if test="doctorId!=null">
+			and ho.creater=#{doctorId}
+		</if>
+		<if test="startDate!=null">
+			<![CDATA[ and ho.modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+			<![CDATA[ and ho.modify_date <= #{endDate} ]]>
+		</if>
+		<if test="patientName!=null">
+			and ho.patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="phoneNo !=null">
+			and (p.phone_no like CONCAT('%',#{phoneNo},'%') or
+			sdr.phone_no like CONCAT('%',#{phoneNo},'%'))
+		</if>
+		<if test="diseaseName !=null">
+			and ho.patient_record_id in (
+			select record_id from
+			diagnosis_result where
+			disease_name like CONCAT('%',#{diseaseName},'%')
+			<if test="hospitalId!=null">
+				and hospital_id=#{hospitalId}
+			</if>
+			)
+		</if>
+		<if test="payMode != null">
+			and ho.pay_mode=#{payMode}
+		</if>
+		order by ho.modify_date desc
+		<if test="startRecord!=null and pageSize!=null">
+			limit #{startRecord},#{pageSize}
+		</if>
+	</select>
+	<select id="selectOrderTotalAmtPojo" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultMap="OrderTotalAmtPojoMap">
+		select sum(total_receivable_amt-receivable_amt)
+		totalAlreadyReceivableAmt,
+		sum(ifnull(actual_amt,0)-ifnull(refund_amt,0))
+		totalFinalActualAmt
+		from hospital_order
+		where
+		<![CDATA[ charge_status & 2 >0 ]]>
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="doctorId!=null">
+			and creater=#{doctorId}
+		</if>
+		<if test="startDate!=null">
+			<![CDATA[ and modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+			<![CDATA[ and modify_date <= #{endDate} ]]>
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="phoneNo !=null">
+			and patient_id in (
+			select patient_id from patient where
+			phone_no like
+			CONCAT('%',#{phoneNo},'%')
+			)
+		</if>
+		<if test="diseaseName !=null">
+			and patient_record_id in (
+			select record_id from
+			diagnosis_result where
+			disease_name like CONCAT('%',#{diseaseName},'%')
+			<if test="hospitalId!=null">
+				and hospital_id=#{hospitalId}
+			</if>
+			)
+		</if>
+		<if test="payMode != null">
+			and pay_mode=#{payMode}
+		</if>
+	</select>
+	<select id="selectCountOfOrderStatisticsItemPojos"
+		parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultType="java.lang.Integer">
+		select count(*) from hospital_order where 
+		<![CDATA[ charge_status & 2 >0 ]]>
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="doctorId!=null">
+			and creater=#{doctorId}
+		</if>
+		<if test="startDate!=null">
+			<![CDATA[ and modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+			<![CDATA[ and modify_date <= #{endDate} ]]>
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="phoneNo !=null">
+			and patient_id in (
+			select patient_id from patient where
+			phone_no like
+			CONCAT('%',#{phoneNo},'%')
+			)
+		</if>
+		<if test="diseaseName !=null">
+			and patient_record_id in (
+			select record_id from
+			diagnosis_result where
+			disease_name like CONCAT('%',#{diseaseName},'%')
+			<if test="hospitalId!=null">
+				and hospital_id=#{hospitalId}
+			</if>
+			)
+		</if>
+		<if test="payMode != null">
+			and pay_mode=#{payMode}
+		</if>
+	</select>
+	<select id="selectReceivableAmtSumFromOrderItemChargeByStatisticsRequest"
+		resultType="java.lang.Double"
+		parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest">
+		select sum(receivable_amt) sum from order_item_charge where
+		charge_status=6 and order_no in (
+		select order_no from hospital_order where
+			<![CDATA[ charge_status & 2 >0 ]]>
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="doctorId!=null">
+			and creater=#{doctorId}
+		</if>
+		<if test="startDate!=null">
+			<![CDATA[ and modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+			<![CDATA[ and modify_date <= #{endDate} ]]>
+		</if>
+		<if test="patientName!=null">
+			and patient_name like CONCAT('%',#{patientName},'%')
+		</if>
+		<if test="phoneNo !=null">
+			and patient_id in (
+			select patient_id from patient where
+			phone_no like
+			CONCAT('%',#{phoneNo},'%')
+			)
+		</if>
+		<if test="diseaseName !=null">
+			and patient_record_id in (
+			select record_id from
+			diagnosis_result where
+			disease_name like CONCAT('%',#{diseaseName},'%')
+			<if test="hospitalId!=null">
+				and hospital_id=#{hospitalId}
+			</if>
+			)
+		</if>
+		<if test="payMode != null">
+			and pay_mode=#{payMode}
+		</if>
+		)
+	</select>
+	<select id="selectCountOfWorkloadItemPojos" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM hospital_order ho
+		WHERE
+			<![CDATA[ charge_status & 2 >0 ]]>
+		<if test="hospitalId != null">
+			AND ho.hospital_id = #{hospitalId}
+		</if>
+		<if test="doctorName !=null">
+			AND ho.creater in(
+			SELECT doctor_id creater
+			FROM doctor
+			WHERE real_name LIKE CONCAT('%',#{doctorName},'%'))
+		</if>
+		<if test="startDate!=null">
+				<![CDATA[and  ho.modify_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+				<![CDATA[and  ho.modify_date <= #{endDate} ]]>
+		</if>
+	</select>
+	<!-- 统计相关sql end -->
+</mapper>

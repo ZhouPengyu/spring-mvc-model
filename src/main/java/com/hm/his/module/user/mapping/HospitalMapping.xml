@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.user.dao.HospitalMapper">
+	<resultMap id="hospitalResultMap" type="com.hm.his.module.user.model.Hospital">
+		<result column="hospital_id" property="hospitalId" />
+		<result column="hospital_name" property="hospitalName" />
+		<result column="hospital_number" property="hospitalNumber" />
+		<result column="create_date" property="createDate" />
+		<result column="organization_license" property="organizationLicense" />
+		<result column="address" property="address" />
+		<result column="invitation_code" property="invitationCode" />
+	</resultMap>
+
+	<insert id="insertHospital" parameterType="com.hm.his.module.user.model.Hospital"
+		useGeneratedKeys="true" keyProperty="hospitalId">
+		INSERT INTO hospital (hospital_name, organization_license, address, hospital_number, invitation_code)
+		VALUES (#{hospitalName}, #{organizationLicense}, #{address}, #{hospitalNumber}, #{invitationCode});
+	</insert>
+	
+	<update id="updateHospital" parameterType="com.hm.his.module.user.model.Hospital" >
+		UPDATE hospital 
+		<set>
+			hospital_name = #{hospitalName},
+			organization_license = #{organizationLicense},
+			address = #{address},
+			hospital_number = #{hospitalNumber},
+			invitation_code = #{invitationCode}
+		</set>
+		WHERE hospital_id = #{hospitalId}
+	</update>
+
+	<select id="getHospitalName" resultType="java.lang.String">
+		SELECT hospital_name FROM hospital WHERE 
+		hospital_id in(SELECT hospital_id FROM doctor where doctor_id = #{doctorId})
+	</select>
+
+
+
+	<select id="searchHospital" resultMap="hospitalResultMap" parameterType="com.hm.his.module.user.model.Doctor">
+		SELECT * FROM hospital h
+	</select>
+	
+	<select id="getHospitalById" resultMap="hospitalResultMap">
+		SELECT * FROM hospital WHERE hospital_id = #{hospitalId}
+	</select>
+
+	<select id="getHospitalByDoctorId" resultMap="hospitalResultMap">
+		SELECT *
+		FROM hospital
+		WHERE
+		hospital_id in(SELECT hospital_id FROM doctor where doctor_id = #{doctorId})
+	</select>
+
+</mapper>

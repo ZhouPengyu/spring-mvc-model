@@ -1,0 +1,793 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.drug.dao.HospitalDrugMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.drug.model.HospitalDrug" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_name" property="drugName" jdbcType="VARCHAR" />
+    <result column="drug_type" property="drugType" jdbcType="INTEGER" />
+    <result column="is_otc" property="isOtc" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="approval_number" property="approvalNumber" jdbcType="VARCHAR" />
+    <result column="bar_code" property="barCode" jdbcType="VARCHAR" />
+    <result column="mnemoni_code" property="mnemoniCode" jdbcType="VARCHAR" />
+    <result column="single_dosage" property="singleDosage" jdbcType="VARCHAR" />
+    <result column="single_dosage_unit" property="singleDosageUnit" jdbcType="VARCHAR" />
+    <result column="frequency" property="frequency" jdbcType="VARCHAR" />
+    <result column="prescribe_amount" property="prescribeAmount" jdbcType="DOUBLE" />
+    <result column="prescribe_amount_unit" property="prescribeAmountUnit" jdbcType="VARCHAR" />
+    <result column="instruction" property="instruction" jdbcType="VARCHAR" />
+    <result column="doctor_advice" property="doctorAdvice" jdbcType="VARCHAR" />
+    <result column="spec_minimum_dosage" property="specMinimumDosage" jdbcType="DOUBLE" />
+
+    <result column="specification" property="specification" jdbcType="VARCHAR" />
+    <result column="spec_minimum_unit" property="specMinimumUnit" jdbcType="VARCHAR" />
+    <result column="spec_unit" property="specUnit" jdbcType="VARCHAR" />
+    <result column="spec_unitary_ratio" property="specUnitaryRatio" jdbcType="INTEGER" />
+    <result column="spec_package_unit" property="specPackageUnit" jdbcType="VARCHAR" />
+    <result column="manufacturer" property="manufacturer" jdbcType="VARCHAR" />
+    <result column="purchase_price" property="purchasePrice" jdbcType="DOUBLE" />
+    <result column="prescription_price" property="prescriptionPrice" jdbcType="DOUBLE" />
+    <result column="sale_price" property="salePrice" jdbcType="DOUBLE" />
+    <result column="open_stock" property="openStock" jdbcType="INTEGER" />
+    <result column="direct_drug_purchase" property="directDrugPurchase" jdbcType="INTEGER" />
+    <result column="supplier" property="supplier" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+    <result column="creater" property="creater" jdbcType="INTEGER" />
+    <result column="modifier" property="modifier" jdbcType="INTEGER" />
+    <result column="pinyin" property="pinyin" jdbcType="VARCHAR" />
+    <result column="pinyin_first" property="pinyinFirst" jdbcType="VARCHAR" />
+    <result column="inventory_count" property="inventoryCount" jdbcType="DOUBLE" />
+    <result column="inventory_threshold" property="inventoryThreshold" jdbcType="INTEGER" />
+    <result column="inventory_ceiling" property="inventoryCeiling" jdbcType="INTEGER" />
+    <result column="validity_date" property="validityDate" jdbcType="TIMESTAMP" />
+
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, drug_name, drug_type, is_otc, status, flag, approval_number, bar_code,
+    mnemoni_code, single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction, doctor_advice,
+    specification, spec_minimum_dosage,
+    spec_minimum_unit, spec_unit, spec_unitary_ratio, spec_package_unit,  manufacturer,
+    purchase_price, prescription_price, sale_price, open_stock, direct_drug_purchase, 
+    supplier, create_date, modify_date, creater, modifier,pinyin,pinyin_first
+  </sql>
+
+
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from hospital_drug
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectDrugListByDefault" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from hospital_drug where flag=1 and hospital_id=#{hospitalId} LIMIT 10;
+  </select>
+
+  <select id="selectDrugListByHospitalId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from hospital_drug where  hospital_id=#{hospitalId}
+  </select>
+
+
+  <select id="searchDrugNameList" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select hd.id,drug_name
+    from hospital_drug hd where hd.hospital_id=#{hospitalId} and flag=1
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%')
+      or pinyin_first like CONCAT(#{drugName},'%') or pinyin like CONCAT(#{drugName},'%')
+      or pinyin_first like CONCAT('%[',#{drugName},'%') or pinyin like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    group by drug_name order by pinyin  LIMIT 5
+  </select>
+
+  <select id="searchDrugByName" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select hd.id,hd.hospital_id,drug_name,single_dosage,single_dosage_unit, prescribe_amount,prescribe_amount_unit,open_stock,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,frequency,doctor_advice, instruction,
+     manufacturer,purchase_price,prescription_price,sale_price,inventory_count
+     from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id where hd.hospital_id=#{hospitalId}
+     and flag=1
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%')
+      or pinyin_first like CONCAT(#{drugName},'%') or pinyin like CONCAT(#{drugName},'%')
+      or pinyin_first like CONCAT('%[',#{drugName},'%') or pinyin like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    order by pinyin
+    <if test="limit!=null">
+      LIMIT #{limit}
+    </if>
+
+  </select>
+
+  <select id="searchDrugByNameForSale" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select hd.id,hd.hospital_id,drug_name,single_dosage,single_dosage_unit, prescribe_amount,prescribe_amount_unit,open_stock,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,frequency,doctor_advice, instruction,
+    manufacturer,purchase_price,prescription_price,sale_price,inventory_count
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id where hd.hospital_id=#{hospitalId}
+    and flag=1 and status=1
+    <if test="drugType!=null">
+      <choose>
+        <when test="drugType == 100"> and drug_type in (2,3,4,5,6) </when>
+        <otherwise> and drug_type=#{drugType} </otherwise>
+      </choose>
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%')
+      or pinyin_first like CONCAT(#{drugName},'%') or pinyin like CONCAT(#{drugName},'%')
+      or pinyin_first like CONCAT('%[',#{drugName},'%') or pinyin like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    order by pinyin LIMIT 5
+  </select>
+
+
+  <select id="searchDrugByDrugIds" resultMap="BaseResultMap" parameterType="java.util.List" >
+    select hd.id,hd.hospital_id, drug_type, drug_name,single_dosage,single_dosage_unit, prescribe_amount,prescribe_amount_unit,open_stock,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,frequency,doctor_advice, instruction,
+    manufacturer,purchase_price,prescription_price,sale_price,inventory_count
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id where hd.id in
+    <foreach item="item" index="index" collection="list"
+             open="(" separator="," close=")">
+       #{item}
+    </foreach>
+
+  </select>
+
+
+
+  <select id="searchDrugByBarCodeForSale" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select hd.id,hd.hospital_id,drug_name,single_dosage,single_dosage_unit, prescribe_amount,prescribe_amount_unit,open_stock,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,frequency,doctor_advice, instruction,
+    manufacturer,purchase_price,prescription_price,sale_price,inventory_count
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id where hd.hospital_id=#{hospitalId}
+    and flag=1 and status=1
+    <if test="drugType!=null">
+      <choose>
+        <when test="drugType == 100"> and drug_type in (2,3,4,5,6) </when>
+        <otherwise> and drug_type=#{drugType} </otherwise>
+      </choose>
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and  bar_code =#{drugName}
+    </if>
+    <if test="barCode!=null and barCode!=''">
+      and  bar_code =#{barCode}
+    </if>
+    order by pinyin
+  </select>
+
+  <select id="searchDrugAndInventory" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select hd.id,hd.hospital_id,drug_name,single_dosage,single_dosage_unit, prescribe_amount,prescribe_amount_unit,open_stock,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,frequency,doctor_advice, instruction,
+    manufacturer,purchase_price,prescription_price,sale_price,inventory_count
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id where hd.id=#{drugId} LIMIT 1
+  </select>
+
+  <select id="selectHospitalDrug" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select
+     hd.id,hd.hospital_id,drug_name,drug_type,is_otc,status,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,spec_unit,spec_unitary_ratio,
+    single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction,open_stock, manufacturer,purchase_price,prescription_price,sale_price,inventory_count,inventory_threshold,pinyin
+
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1
+    <if test="status!=null">
+      and status=#{status}
+    </if>
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    <if test="alreadyAddList!=null">
+    	and hd.id not in
+    	<foreach collection="alreadyAddList" index="index" item="tag" open="(" separator="," close=")">
+    		#{tag}
+    	</foreach>
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%') or manufacturer like CONCAT('%',#{drugName},'%')
+      or pinyin_first like CONCAT(#{drugName},'%') or pinyin like CONCAT(#{drugName},'%')
+      or pinyin_first like CONCAT('%[',#{drugName},'%') or pinyin like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    order by create_date desc
+    <if test="pageSize!=null">
+      limit #{startRecord},#{pageSize}
+    </if>
+  </select>
+
+  <select id="countHospitalDrug" resultType="java.lang.Integer" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select count(1) from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1
+    <if test="status!=null">
+      and status=#{status}
+    </if>
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    <if test="alreadyAddList!=null">
+    	and hd.id not in
+    	<foreach collection="alreadyAddList" index="index" item="tag" open="(" separator="," close=")">
+    		#{tag}
+    	</foreach>
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%') or manufacturer like CONCAT('%',#{drugName},'%')
+      or pinyin_first like CONCAT(#{drugName},'%') or pinyin like CONCAT(#{drugName},'%')
+      or pinyin_first like CONCAT('%[',#{drugName},'%') or pinyin like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+  </select>
+
+
+  <select id="countHospitalDrugAllByHospitalId" resultType="java.lang.Integer" parameterType="java.lang.Long" >
+    select count(1) from hospital_drug where hospital_id=#{hospitalId}
+  </select>
+
+
+
+  <select id="checkDrugRepeatedByBarCode" resultType="java.lang.Long" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    select id from hospital_drug where hospital_id=#{hospitalId} and flag=1
+    <if test="barCode!=null">
+      and bar_code=#{barCode}
+    </if>
+    LIMIT 1
+  </select>
+<!-- 如果为修改药品，检测重复，则ID不为空-->
+  <select id="checkDrugRepeatedByNameAndSpec" resultType="java.lang.Integer" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    select count(1) from hospital_drug where hospital_id=#{hospitalId} and flag=1
+    <if test="id!=null">
+      and id != #{id}
+    </if>
+    <!--and drug_name=#{drugName}  and drug_type=#{drugType} and manufacturer=#{manufacturer}-->
+    <!--and specification=#{specification} and spec_package_unit=#{specPackageUnit}-->
+    <if test="drugName!=null and drugName!=''">
+      and drug_name=#{drugName}
+    </if>
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    <if test="manufacturer!=null and manufacturer!=''">
+      and manufacturer=#{manufacturer}
+    </if>
+    <if test="specification!=null and specification!=''">
+      and specification=#{specification}
+    </if>
+    <if test="specPackageUnit!=null and specPackageUnit!=''">
+      and spec_package_unit=#{specPackageUnit}
+    </if>
+  </select>
+  
+  <!-- 检查药品是否存在，返回ID -->
+  <select id="getRepeatedDrugId" resultType="java.lang.Integer" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    select id from hospital_drug where hospital_id=#{hospitalId} and flag=1
+    <if test="id!=null">
+      and id != #{id}
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and drug_name=#{drugName}
+    </if>
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    <if test="manufacturer!=null and manufacturer!=''">
+      and manufacturer=#{manufacturer}
+    </if>
+    <if test="specification!=null and specification!=''">
+      and specification=#{specification}
+    </if>
+    <if test="specPackageUnit!=null and specPackageUnit!=''">
+      and spec_package_unit=#{specPackageUnit}
+    </if>
+  </select>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from hospital_drug
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertHospitalDrugByList" parameterType="com.hm.his.module.drug.model.HospitalDrug">
+    insert into hospital_drug ( hospital_id, drug_name,
+    drug_type, is_otc, status,
+    flag, approval_number, bar_code,
+    mnemoni_code, single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction, doctor_advice,
+    specification,spec_minimum_dosage, spec_minimum_unit, spec_unit,
+    spec_unitary_ratio, spec_package_unit,
+    manufacturer, purchase_price, prescription_price,
+    sale_price, open_stock, direct_drug_purchase,
+    supplier,
+    creater, modifier,pinyin,pinyin_first)
+    values
+    <foreach collection="list" item="drugs" index="index"
+             separator=",">
+      ( #{drugs.hospitalId,jdbcType=INTEGER}, #{drugs.drugName,jdbcType=VARCHAR},
+      #{drugs.drugType,jdbcType=INTEGER}, #{drugs.isOtc,jdbcType=INTEGER}, #{drugs.status,jdbcType=INTEGER},
+      #{drugs.flag,jdbcType=INTEGER}, #{drugs.approvalNumber,jdbcType=VARCHAR}, #{drugs.barCode,jdbcType=VARCHAR},
+      #{drugs.mnemoniCode,jdbcType=VARCHAR}, #{drugs.singleDosage,jdbcType=VARCHAR}, #{drugs.singleDosageUnit,jdbcType=VARCHAR}, #{drugs.frequency,jdbcType=VARCHAR},
+      #{drugs.prescribeAmount,jdbcType=DOUBLE},#{drugs.prescribeAmountUnit,jdbcType=VARCHAR}, #{drugs.instruction,jdbcType=VARCHAR}, #{drugs.doctorAdvice,jdbcType=VARCHAR},
+      #{drugs.specification,jdbcType=VARCHAR},#{drugs.specMinimumDosage,jdbcType=DOUBLE}, #{drugs.specMinimumUnit,jdbcType=VARCHAR}, #{drugs.specUnit,jdbcType=VARCHAR},
+      #{drugs.specUnitaryRatio,jdbcType=INTEGER}, #{drugs.specPackageUnit,jdbcType=VARCHAR},
+      #{drugs.manufacturer,jdbcType=VARCHAR}, #{drugs.purchasePrice,jdbcType=DOUBLE}, #{drugs.prescriptionPrice,jdbcType=DOUBLE},
+      #{drugs.salePrice,jdbcType=DOUBLE}, #{drugs.openStock,jdbcType=INTEGER}, #{drugs.directDrugPurchase,jdbcType=INTEGER},
+      #{drugs.supplier,jdbcType=VARCHAR},
+      #{drugs.creater,jdbcType=INTEGER}, #{drugs.modifier,jdbcType=INTEGER},#{drugs.pinyin,jdbcType=VARCHAR},#{drugs.pinyinFirst,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+
+  <insert id="insert" parameterType="com.hm.his.module.drug.model.HospitalDrug" useGeneratedKeys="true" keyProperty="id">
+    insert into hospital_drug ( hospital_id, drug_name, 
+      drug_type, is_otc, status, 
+      flag, approval_number, bar_code, 
+      mnemoni_code, single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction, doctor_advice,
+      specification,spec_minimum_dosage, spec_minimum_unit, spec_unit,
+      spec_unitary_ratio, spec_package_unit,
+      manufacturer, purchase_price, prescription_price, 
+      sale_price, open_stock, direct_drug_purchase, 
+      supplier,
+      creater, modifier,pinyin,pinyin_first)
+    values ( #{hospitalId,jdbcType=INTEGER}, #{drugName,jdbcType=VARCHAR},
+    #{drugType,jdbcType=INTEGER}, #{isOtc,jdbcType=INTEGER}, #{status,jdbcType=INTEGER},
+      #{flag,jdbcType=INTEGER}, #{approvalNumber,jdbcType=VARCHAR}, #{barCode,jdbcType=VARCHAR}, 
+      #{mnemoniCode,jdbcType=VARCHAR}, #{singleDosage,jdbcType=VARCHAR}, #{singleDosageUnit,jdbcType=VARCHAR}, #{frequency,jdbcType=VARCHAR},
+      #{prescribeAmount,jdbcType=DOUBLE},#{prescribeAmountUnit,jdbcType=VARCHAR}, #{instruction,jdbcType=VARCHAR}, #{doctorAdvice,jdbcType=VARCHAR},
+      #{specification,jdbcType=VARCHAR},#{specMinimumDosage,jdbcType=DOUBLE}, #{specMinimumUnit,jdbcType=VARCHAR}, #{specUnit,jdbcType=VARCHAR},
+      #{specUnitaryRatio,jdbcType=INTEGER}, #{specPackageUnit,jdbcType=VARCHAR},
+      #{manufacturer,jdbcType=VARCHAR}, #{purchasePrice,jdbcType=DOUBLE}, #{prescriptionPrice,jdbcType=DOUBLE}, 
+      #{salePrice,jdbcType=DOUBLE}, #{openStock,jdbcType=INTEGER}, #{directDrugPurchase,jdbcType=INTEGER}, 
+      #{supplier,jdbcType=VARCHAR},
+      #{creater,jdbcType=INTEGER}, #{modifier,jdbcType=INTEGER},#{pinyin,jdbcType=VARCHAR},#{pinyinFirst,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    insert into hospital_drug
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="drugName != null" >
+        drug_name,
+      </if>
+
+      <if test="drugType != null" >
+        drug_type,
+      </if>
+      <if test="isOtc != null" >
+        is_otc,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="flag != null" >
+        flag,
+      </if>
+      <if test="approvalNumber != null" >
+        approval_number,
+      </if>
+      <if test="barCode != null" >
+        bar_code,
+      </if>
+      <if test="mnemoniCode != null" >
+        mnemoni_code,
+      </if>
+      <if test="singleDosage != null" >
+        single_dosage,
+      </if>
+      <if test="singleDosageUnit != null" >
+        single_dosage_unit,
+      </if>
+      <if test="frequency != null" >
+        frequency,
+      </if>
+      <if test="prescribeAmount != null" >
+        prescribe_amount,
+      </if>
+      <if test="prescribeAmountUnit != null" >
+        prescribe_amount_unit,
+      </if>
+      <if test="instruction != null" >
+        instruction,
+      </if>
+      <if test="doctorAdvice != null" >
+        doctor_advice,
+      </if>
+      <if test="specification != null" >
+        specification,
+      </if>
+      <if test="specMinimumDosage != null" >
+        spec_minimum_dosage,
+      </if>
+      <if test="specMinimumUnit != null" >
+        spec_minimum_unit,
+      </if>
+      <if test="specUnit != null" >
+        spec_unit,
+      </if>
+      <if test="specUnitaryRatio != null" >
+        spec_unitary_ratio,
+      </if>
+      <if test="specPackageUnit != null" >
+        spec_package_unit,
+      </if>
+
+      <if test="manufacturer != null" >
+        manufacturer,
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price,
+      </if>
+      <if test="prescriptionPrice != null" >
+        prescription_price,
+      </if>
+      <if test="salePrice != null" >
+        sale_price,
+      </if>
+      <if test="openStock != null" >
+        open_stock,
+      </if>
+      <if test="directDrugPurchase != null" >
+        direct_drug_purchase,
+      </if>
+      <if test="supplier != null" >
+        supplier,
+      </if>
+
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="modifier != null" >
+        modifier,
+      </if>
+      <if test="pinyin != null" >
+        pinyin,
+      </if>
+      <if test="pinyinFirst != null" >
+        pinyin_first,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugName != null" >
+        #{drugName,jdbcType=VARCHAR},
+      </if>
+
+      <if test="drugType != null" >
+        #{drugType,jdbcType=INTEGER},
+      </if>
+      <if test="isOtc != null" >
+        #{isOtc,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="flag != null" >
+        #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="approvalNumber != null" >
+        #{approvalNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="barCode != null" >
+        #{barCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mnemoniCode != null" >
+        #{mnemoniCode,jdbcType=VARCHAR},
+      </if>
+      <if test="singleDosage != null" >
+        #{singleDosage,jdbcType=VARCHAR},
+      </if>
+      <if test="singleDosageUnit != null" >
+        #{singleDosageUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="frequency != null" >
+        #{frequency,jdbcType=VARCHAR},
+      </if>
+      <if test="prescribeAmount != null" >
+        #{prescribeAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="prescribeAmountUnit != null" >
+        #{prescribeAmountUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="instruction != null" >
+        #{instruction,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorAdvice != null" >
+        #{doctorAdvice,jdbcType=VARCHAR},
+      </if>
+      <if test="specification != null" >
+        #{specification,jdbcType=VARCHAR},
+      </if>
+      <if test="specMinimumDosage != null" >
+        #{specMinimumDosage,jdbcType=DOUBLE},
+      </if>
+      <if test="specMinimumUnit != null" >
+        #{specMinimumUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="specUnit != null" >
+        #{specUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="specUnitaryRatio != null" >
+        #{specUnitaryRatio,jdbcType=INTEGER},
+      </if>
+      <if test="specPackageUnit != null" >
+        #{specPackageUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null" >
+        #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="purchasePrice != null" >
+        #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="prescriptionPrice != null" >
+        #{prescriptionPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="salePrice != null" >
+        #{salePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="openStock != null" >
+        #{openStock,jdbcType=INTEGER},
+      </if>
+      <if test="directDrugPurchase != null" >
+        #{directDrugPurchase,jdbcType=INTEGER},
+      </if>
+      <if test="supplier != null" >
+        #{supplier,jdbcType=VARCHAR},
+      </if>
+
+      <if test="creater != null" >
+        #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=INTEGER},
+      </if>
+      <if test="pinyin != null" >
+        #{pinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyinFirst != null" >
+        #{pinyinFirst,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    update hospital_drug
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugName != null" >
+        drug_name = #{drugName,jdbcType=VARCHAR},
+      </if>
+
+      <if test="drugType != null" >
+        drug_type = #{drugType,jdbcType=INTEGER},
+      </if>
+      <if test="isOtc != null" >
+        is_otc = #{isOtc,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="flag != null" >
+        flag = #{flag,jdbcType=INTEGER},
+      </if>
+      <if test="approvalNumber != null" >
+        approval_number = #{approvalNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="barCode != null" >
+        bar_code = #{barCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mnemoniCode != null" >
+        mnemoni_code = #{mnemoniCode,jdbcType=VARCHAR},
+      </if>
+      <if test="singleDosage != null" >
+        single_dosage = #{singleDosage,jdbcType=VARCHAR},
+      </if>
+      <if test="singleDosageUnit != null" >
+        single_dosage_unit = #{singleDosageUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="frequency != null" >
+        frequency = #{frequency,jdbcType=VARCHAR},
+      </if>
+      <if test="prescribeAmount != null" >
+        prescribe_amount = #{prescribeAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="prescribeAmountUnit != null" >
+        prescribe_amount_unit = #{prescribeAmountUnit,jdbcType=DOUBLE},
+      </if>
+      <if test="instruction != null" >
+        instruction = #{instruction,jdbcType=VARCHAR},
+      </if>
+      <if test="doctorAdvice != null" >
+        doctor_advice = #{doctorAdvice,jdbcType=VARCHAR},
+      </if>
+      <if test="specification != null" >
+        specification = #{specification,jdbcType=VARCHAR},
+      </if>
+      <if test="specMinimumDosage != null" >
+        spec_minimum_dosage = #{specMinimumDosage,jdbcType=DOUBLE},
+      </if>
+      <if test="specMinimumUnit != null" >
+        spec_minimum_unit = #{specMinimumUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="specUnit != null" >
+        spec_unit = #{specUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="specUnitaryRatio != null" >
+        spec_unitary_ratio = #{specUnitaryRatio,jdbcType=INTEGER},
+      </if>
+      <if test="specPackageUnit != null" >
+        spec_package_unit = #{specPackageUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null" >
+        manufacturer = #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="prescriptionPrice != null" >
+        prescription_price = #{prescriptionPrice,jdbcType=DOUBLE},
+      </if>
+      <if test="salePrice != null" >
+        sale_price = #{salePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="openStock != null" >
+        open_stock = #{openStock,jdbcType=INTEGER},
+      </if>
+      <if test="directDrugPurchase != null" >
+        direct_drug_purchase = #{directDrugPurchase,jdbcType=INTEGER},
+      </if>
+      <if test="supplier != null" >
+        supplier = #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        modifier = #{modifier,jdbcType=INTEGER},
+      </if>
+      <if test="pinyin != null" >
+        pinyin = #{pinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyinFirst != null" >
+        pinyin_first = #{pinyinFirst,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <update id="deletByDrugId" parameterType="java.lang.Integer" >
+        update hospital_drug set flag = 0  where id = #{id,jdbcType=INTEGER}
+    </update>
+
+  <update id="updateHospitalDrugPrice" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    update hospital_drug
+    <set >
+    <if test="purchasePrice != null" >
+      purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+    </if>
+    <if test="prescriptionPrice != null" >
+      prescription_price = #{prescriptionPrice,jdbcType=DOUBLE},
+    </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.drug.model.HospitalDrug" >
+    update hospital_drug
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+      drug_name = #{drugName,jdbcType=VARCHAR},
+      drug_type = #{drugType,jdbcType=INTEGER},
+      is_otc = #{isOtc,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      flag = #{flag,jdbcType=INTEGER},
+      approval_number = #{approvalNumber,jdbcType=VARCHAR},
+      bar_code = #{barCode,jdbcType=VARCHAR},
+      mnemoni_code = #{mnemoniCode,jdbcType=VARCHAR},
+      single_dosage = #{singleDosage,jdbcType=VARCHAR},
+      single_dosage_unit = #{singleDosageUnit,jdbcType=VARCHAR},
+      frequency = #{frequency,jdbcType=VARCHAR},
+      prescribe_amount = #{prescribeAmount,jdbcType=DOUBLE},
+      prescribe_amount_unit = #{prescribeAmountUnit,jdbcType=DOUBLE},
+      instruction = #{instruction,jdbcType=VARCHAR},
+      doctor_advice = #{doctorAdvice,jdbcType=VARCHAR},
+      specification = #{specification,jdbcType=VARCHAR},
+      spec_minimum_dosage = #{specMinimumDosage,jdbcType=DOUBLE},
+      spec_minimum_unit = #{specMinimumUnit,jdbcType=VARCHAR},
+      spec_unit = #{specUnit,jdbcType=VARCHAR},
+      spec_unitary_ratio = #{specUnitaryRatio,jdbcType=INTEGER},
+      spec_package_unit = #{specPackageUnit,jdbcType=VARCHAR},
+      manufacturer = #{manufacturer,jdbcType=VARCHAR},
+      purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      prescription_price = #{prescriptionPrice,jdbcType=DOUBLE},
+      sale_price = #{salePrice,jdbcType=DOUBLE},
+      open_stock = #{openStock,jdbcType=INTEGER},
+      direct_drug_purchase = #{directDrugPurchase,jdbcType=INTEGER},
+      supplier = #{supplier,jdbcType=VARCHAR},
+      creater = #{creater,jdbcType=INTEGER},
+      modifier = #{modifier,jdbcType=INTEGER},
+      pinyin = #{pinyin,jdbcType=VARCHAR},
+      pinyin_first = #{pinyinFirst,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="searchDrugByInventoryAlarm" resultMap="BaseResultMap">
+  	select
+     hd.id,hd.hospital_id,drug_name,drug_type,is_otc,status,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,
+    spec_unit,spec_unitary_ratio,single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction,
+    open_stock, manufacturer,purchase_price,prescription_price,sale_price,di.inventory_count,pinyin,di.inventory_threshold,di.inventory_ceiling
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1 and di.inventory_threshold != 0
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    and (di.inventory_count <![CDATA[<=]]> di.inventory_threshold or di.inventory_count is null)
+    order by di.inventory_count 
+    <if test="pageSize != null">
+    	limit #{startRecord},#{pageSize}
+    </if>
+  </select>
+
+  <select id="searchDrugInventoryMoreThanZero" resultMap="BaseResultMap">
+    select
+    hd.id,hd.hospital_id,drug_name,drug_type,is_otc,status,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,
+    spec_unit,spec_unitary_ratio,single_dosage,single_dosage_unit, frequency, prescribe_amount,prescribe_amount_unit, instruction,
+    open_stock, manufacturer,purchase_price,prescription_price,sale_price,di.inventory_count,pinyin,di.inventory_threshold,di.validity_date,di.inventory_ceiling
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1
+    and  di.inventory_count >0
+  </select>
+
+
+  
+  <select id="countDrugByInventoryAlarm" resultType="java.lang.Integer"  parameterType="com.hm.his.module.drug.pojo.DrugRequest">
+    select
+    count(1)
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1
+    <if test="drugType!=null">
+      and drug_type=#{drugType}
+    </if>
+    and  di.inventory_count <![CDATA[<=]]> di.inventory_threshold
+  </select>
+
+
+  <select id="searchDrugByHospitalId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select hd.id,hd.hospital_id,drug_name,pinyin_first,pinyin
+    from hospital_drug hd  where hd.hospital_id=#{hospitalId}
+  </select>
+
+  <select id="searchHospitalDrugForPinyin" resultMap="BaseResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select hd.id,hd.hospital_id,drug_name
+    from hospital_drug hd where 1=1
+    <if test="drugName != null" >
+      and drug_name like  CONCAT('%',#{drugName},'%')
+    </if>
+
+    <if test="pinyin != null" >
+      and pinyin like CONCAT('%',#{pinyin},'%')
+    </if>
+    order by id LIMIT #{startRecord},#{pageSize}
+  </select>
+
+  <update id="batchUpdateDrugPinyin"  parameterType="java.util.List">
+
+    <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+      update hospital_drug
+      <set>
+        pinyin = #{item.pinyin},
+        pinyin_first = #{item.pinyinFirst}
+      </set>
+      where id = ${item.id}
+    </foreach>
+
+  </update>
+
+</mapper>

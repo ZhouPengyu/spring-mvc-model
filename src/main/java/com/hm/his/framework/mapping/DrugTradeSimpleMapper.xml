@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.drug.dao.DrugTradeSimpleMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.drug.model.DrugTradeSimple" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="common_name" property="commonName" jdbcType="VARCHAR" />
+    <result column="trade_name" property="tradeName" jdbcType="VARCHAR" />
+    <result column="common_pinyin" property="commonPinyin" jdbcType="VARCHAR" />
+    <result column="common_pinyin_first" property="commonPinyinFirst" jdbcType="VARCHAR" />
+    <result column="trade_pinyin" property="tradePinyin" jdbcType="VARCHAR" />
+    <result column="trade_pinyin_first" property="tradePinyinFirst" jdbcType="VARCHAR" />
+    <result column="drug_names" property="drugNames" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, common_name, trade_name, common_pinyin, common_pinyin_first, trade_pinyin, trade_pinyin_first, 
+    drug_names
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from drug_trade_simple
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from drug_trade_simple
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.drug.model.DrugTradeSimple" >
+    insert into drug_trade_simple (id, common_name, trade_name, 
+      common_pinyin, common_pinyin_first, trade_pinyin, 
+      trade_pinyin_first, drug_names)
+    values (#{id,jdbcType=INTEGER}, #{commonName,jdbcType=VARCHAR}, #{tradeName,jdbcType=VARCHAR}, 
+      #{commonPinyin,jdbcType=VARCHAR}, #{commonPinyinFirst,jdbcType=VARCHAR}, #{tradePinyin,jdbcType=VARCHAR}, 
+      #{tradePinyinFirst,jdbcType=VARCHAR}, #{drugNames,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.drug.model.DrugTradeSimple" >
+    insert into drug_trade_simple
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="commonName != null" >
+        common_name,
+      </if>
+      <if test="tradeName != null" >
+        trade_name,
+      </if>
+      <if test="commonPinyin != null" >
+        common_pinyin,
+      </if>
+      <if test="commonPinyinFirst != null" >
+        common_pinyin_first,
+      </if>
+      <if test="tradePinyin != null" >
+        trade_pinyin,
+      </if>
+      <if test="tradePinyinFirst != null" >
+        trade_pinyin_first,
+      </if>
+      <if test="drugNames != null" >
+        drug_names,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="commonName != null" >
+        #{commonName,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeName != null" >
+        #{tradeName,jdbcType=VARCHAR},
+      </if>
+      <if test="commonPinyin != null" >
+        #{commonPinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="commonPinyinFirst != null" >
+        #{commonPinyinFirst,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePinyin != null" >
+        #{tradePinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePinyinFirst != null" >
+        #{tradePinyinFirst,jdbcType=VARCHAR},
+      </if>
+      <if test="drugNames != null" >
+        #{drugNames,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.drug.model.DrugTradeSimple" >
+    update drug_trade_simple
+    <set >
+      <if test="commonName != null" >
+        common_name = #{commonName,jdbcType=VARCHAR},
+      </if>
+      <if test="tradeName != null" >
+        trade_name = #{tradeName,jdbcType=VARCHAR},
+      </if>
+      <if test="commonPinyin != null" >
+        common_pinyin = #{commonPinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="commonPinyinFirst != null" >
+        common_pinyin_first = #{commonPinyinFirst,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePinyin != null" >
+        trade_pinyin = #{tradePinyin,jdbcType=VARCHAR},
+      </if>
+      <if test="tradePinyinFirst != null" >
+        trade_pinyin_first = #{tradePinyinFirst,jdbcType=VARCHAR},
+      </if>
+      <if test="drugNames != null" >
+        drug_names = #{drugNames,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.drug.model.DrugTradeSimple" >
+    update drug_trade_simple
+    set common_name = #{commonName,jdbcType=VARCHAR},
+      trade_name = #{tradeName,jdbcType=VARCHAR},
+      common_pinyin = #{commonPinyin,jdbcType=VARCHAR},
+      common_pinyin_first = #{commonPinyinFirst,jdbcType=VARCHAR},
+      trade_pinyin = #{tradePinyin,jdbcType=VARCHAR},
+      trade_pinyin_first = #{tradePinyinFirst,jdbcType=VARCHAR},
+      drug_names = #{drugNames,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

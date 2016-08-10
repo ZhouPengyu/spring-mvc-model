@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.template.dao.TemplateMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.template.model.Template" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="doctor_id" property="doctorId" jdbcType="INTEGER" />
+    <result column="temp_name" property="tempName" jdbcType="VARCHAR" />
+    <result column="temp_desc" property="tempDesc" jdbcType="VARCHAR" />
+    <result column="temp_type" property="tempType" jdbcType="INTEGER" />
+    <result column="link_id" property="linkId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+    <result column="modify_date" property="modifyDate" jdbcType="TIMESTAMP" />
+    <result column="creater" property="creater" jdbcType="INTEGER" />
+    <result column="modifier" property="modifier" jdbcType="INTEGER" />
+    <result column="cn_drug_names" property="cnDrugNames" jdbcType="VARCHAR" />
+    <result column="drug_names" property="drugNames" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, doctor_id, temp_name, temp_desc, temp_type, link_id, status, create_date,
+    modify_date, creater, modifier
+  </sql>
+
+  <select id="selectTemplateList" resultMap="BaseResultMap" parameterType="com.hm.his.module.template.pojo.TemplateRequest" >
+    select
+    <include refid="Base_Column_List" />
+    from template where status = 1 and doctor_id = #{doctorId}
+    <if test="tempType!=null">
+      <choose>
+        <when test="tempType == 3"> and temp_type in (1,2) </when>
+        <otherwise> and temp_type=#{tempType} </otherwise>
+      </choose>
+    </if>
+    <if test="tempName!=null and tempName!=''">
+      and temp_name like CONCAT('%',#{tempName},'%')
+    </if>
+    order by create_date desc,modify_date desc  limit #{startRecord},#{pageSize}
+  </select>
+
+  <select id="countTemplates" resultType="java.lang.Integer" parameterType="com.hm.his.module.template.pojo.TemplateRequest" >
+    select count(1) from template where status = 1 and doctor_id = #{doctorId}
+    <if test="tempType!=null">
+      <choose>
+        <when test="tempType == 3"> and temp_type in (1,2) </when>
+        <otherwise> and temp_type=#{tempType} </otherwise>
+      </choose>
+    </if>
+    <if test="tempName!=null and tempName!=''">
+      and temp_name like CONCAT('%',#{tempName},'%')
+    </if>
+  </select>
+
+
+  <select id="selectTemplateListForRecipe" resultMap="BaseResultMap" parameterType="com.hm.his.module.template.pojo.TemplateRequest" >
+    select
+    temp.id, temp.hospital_id, temp.doctor_id, temp_name, temp_desc, temp_type, link_id, temp.status, temp.create_date,
+    temp.modify_date, temp.creater, temp.modifier,GROUP_CONCAT(pcdp.drug_name)  as cn_drug_names,GROUP_CONCAT(pd.drug_name) as drug_names
+
+    from template temp
+    LEFT JOIN patient_chinese_drug pcd on temp.link_id= pcd.prescription
+    LEFT JOIN patient_chinese_drug_pieces pcdp on pcd.pa_ch_drug_id = pcdp.pa_ch_drug_id
+    LEFT JOIN patient_drug pd on temp.link_id= pd.prescription
+    where temp.status = 1 and temp.doctor_id = #{doctorId}
+    <if test="tempType!=null">
+      <choose>
+        <when test="tempType == 3"> and temp_type in (1,2) </when>
+        <otherwise> and temp_type=#{tempType} </otherwise>
+      </choose>
+    </if>
+    and ( pcd.status= 0 or pd.status= 0 )
+    <if test="tempName!=null and tempName!=''">
+      and temp_name like CONCAT('%',#{tempName},'%')
+    </if>
+    GROUP BY temp.id
+    order by create_date desc,modify_date desc  limit #{startRecord},#{pageSize}
+  </select>
+
+  <select id="countTemplatesForRecipe" resultType="java.lang.Integer" parameterType="com.hm.his.module.template.pojo.TemplateRequest" >
+    select count(1) from (
+    select count(1) as tempCount
+     from template temp
+    LEFT JOIN patient_chinese_drug pcd on temp.link_id= pcd.prescription
+    LEFT JOIN patient_chinese_drug_pieces pcdp on pcd.pa_ch_drug_id = pcdp.pa_ch_drug_id
+    LEFT JOIN patient_drug pd on temp.link_id= pd.prescription
+    where temp.status = 1 and temp.doctor_id = #{doctorId}
+    <if test="tempType!=null">
+      <choose>
+        <when test="tempType == 3"> and temp_type in (1,2) </when>
+        <otherwise> and temp_type=#{tempType} </otherwise>
+      </choose>
+    </if>
+    and ( pcd.status= 0 or pd.status= 0 )
+    <if test="tempName!=null and tempName!=''">
+      and temp_name like CONCAT('%',#{tempName},'%')
+    </if>
+    GROUP BY temp.id ) as template_count
+  </select>
+
+
+
+  <select id="checkTemplateByName" resultType="java.lang.Integer" parameterType="com.hm.his.module.template.pojo.TemplateRequest" >
+    select count(1) from template where status = 1 and doctor_id = #{doctorId}
+    <if test="tempType!=null">
+      and temp_type=#{tempType}
+    </if>
+    <if test="tempName!=null and tempName!=''">
+      and temp_name =#{tempName}
+    </if>
+  </select>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from template
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from template
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <update id="deletByTempId" parameterType="java.lang.Integer" >
+    update template set status = 0  where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <insert id="insert" parameterType="com.hm.his.module.template.model.Template" useGeneratedKeys="true" keyProperty="id">
+    insert into template (id, hospital_id, doctor_id,
+    temp_name, temp_desc, temp_type,
+    link_id, status, create_date,
+    modify_date, creater, modifier
+    )
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{doctorId,jdbcType=INTEGER},
+    #{tempName,jdbcType=VARCHAR}, #{tempDesc,jdbcType=VARCHAR}, #{tempType,jdbcType=INTEGER},
+    #{linkId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, #{createDate,jdbcType=TIMESTAMP},
+    #{modifyDate,jdbcType=TIMESTAMP}, #{creater,jdbcType=INTEGER}, #{modifier,jdbcType=INTEGER}
+    )
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.template.model.Template" useGeneratedKeys="true" keyProperty="id">
+    insert into template
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="doctorId != null" >
+        doctor_id,
+      </if>
+      <if test="tempName != null" >
+        temp_name,
+      </if>
+      <if test="tempDesc != null" >
+        temp_desc,
+      </if>
+      <if test="tempType != null" >
+        temp_type,
+      </if>
+      <if test="linkId != null" >
+        link_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="createDate != null" >
+        create_date,
+      </if>
+      <if test="modifyDate != null" >
+        modify_date,
+      </if>
+      <if test="creater != null" >
+        creater,
+      </if>
+      <if test="modifier != null" >
+        modifier,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="doctorId != null" >
+        #{doctorId,jdbcType=INTEGER},
+      </if>
+      <if test="tempName != null" >
+        #{tempName,jdbcType=VARCHAR},
+      </if>
+      <if test="tempDesc != null" >
+        #{tempDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="tempType != null" >
+        #{tempType,jdbcType=INTEGER},
+      </if>
+      <if test="linkId != null" >
+        #{linkId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createDate != null" >
+        #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.template.model.Template" >
+    update template
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="doctorId != null" >
+        doctor_id = #{doctorId,jdbcType=INTEGER},
+      </if>
+      <if test="tempName != null" >
+        temp_name = #{tempName,jdbcType=VARCHAR},
+      </if>
+      <if test="tempDesc != null" >
+        temp_desc = #{tempDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="tempType != null" >
+        temp_type = #{tempType,jdbcType=INTEGER},
+      </if>
+      <if test="linkId != null" >
+        link_id = #{linkId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createDate != null" >
+        create_date = #{createDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyDate != null" >
+        modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creater != null" >
+        creater = #{creater,jdbcType=INTEGER},
+      </if>
+      <if test="modifier != null" >
+        modifier = #{modifier,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.template.model.Template" >
+    update template
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+    doctor_id = #{doctorId,jdbcType=INTEGER},
+    temp_name = #{tempName,jdbcType=VARCHAR},
+    temp_desc = #{tempDesc,jdbcType=VARCHAR},
+    temp_type = #{tempType,jdbcType=INTEGER},
+    link_id = #{linkId,jdbcType=INTEGER},
+    status = #{status,jdbcType=INTEGER},
+    create_date = #{createDate,jdbcType=TIMESTAMP},
+    modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+    creater = #{creater,jdbcType=INTEGER},
+    modifier = #{modifier,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

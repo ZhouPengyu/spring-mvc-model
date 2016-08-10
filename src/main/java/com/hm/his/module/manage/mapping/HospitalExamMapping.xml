@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.manage.dao.HospitalExamMapper">
+	<resultMap id="hospitalExamResultMap" type="com.hm.his.module.manage.model.HospitalExam">
+		<result column="exam_id" property="examId" />
+		<result column="exam_name" property="examName" />
+		<result column="exam_phoneticize_name" property="examPhoneticizeName" />
+		<result column="exam_abbreviation_name" property="examAbbreviationName" />
+		<result column="exam_price" property="examPrice" jdbcType="DOUBLE" />
+		<result column="exam_cost" property="examCost" jdbcType="DOUBLE" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="create_date" property="createDate" />
+		<result column="creater" property="creater" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="modifier" property="modifier" />
+		<result column="flag" property="flag" />
+	</resultMap>
+
+	<select id="searchHospitalExam" resultMap="hospitalExamResultMap">
+		SELECT exam_id,exam_name,exam_phoneticize_name,exam_abbreviation_name,exam_price,exam_cost,hospital_id,
+				create_date,creater,modify_date,modifier,flag 
+		FROM hospital_exam WHERE flag = 1 
+		<if test="hospitalId != null">
+			and hospital_id = #{hospitalId} 
+		</if>
+		<if test="examId != null">
+			and exam_id = #{examId} 
+		</if>
+		<if test="pageSize !=null">
+			<if test="examName == null or examName == ''">
+			 order by exam_id desc limit #{startPage}, #{pageSize} 
+		</if>
+		</if>
+		<if test="examName != null and examName != ''">
+			and (exam_name like CONCAT(CONCAT('%', #{examName}), '%') 
+                or exam_phoneticize_name like CONCAT(CONCAT('%', #{examName}), '%') 
+                or exam_abbreviation_name like CONCAT(CONCAT('%', #{examName}), '%')) 
+            order by length(exam_name) asc limit 10
+		</if>
+	</select>
+
+
+	<select id="searchHospitalExamByIds" resultMap="hospitalExamResultMap">
+		SELECT exam_id,exam_name,exam_price,exam_cost,hospital_id,flag
+		FROM hospital_exam WHERE exam_id in
+		<foreach collection="list" item="examId" index="index" open="(" separator="," close=")">
+			#{examId}
+		</foreach>
+	</select>
+	
+	<select id="searchHospitalExamTotal" resultType="java.lang.Integer">
+		SELECT count(exam_id) FROM hospital_exam WHERE flag = 1
+		<if test="hospitalId != null">
+			and hospital_id = #{hospitalId} 
+		</if>
+		<if test="examId != null">
+			and exam_id = #{examId} 
+		</if>
+		<if test="examName != null and examName != ''">
+			and (exam_name like CONCAT(CONCAT('%', #{examName}), '%') 
+                or exam_phoneticize_name like CONCAT(CONCAT('%', #{examName}), '%') 
+                or exam_abbreviation_name like CONCAT(CONCAT('%', #{examName}), '%')) 
+            order by length(exam_name) asc limit 10
+		</if>
+	</select>
+	
+	<select id="verifyExamName" resultType="java.lang.Integer">
+		SELECT count(exam_id) FROM hospital_exam 
+		WHERE flag = 1 
+			and hospital_id = #{hospitalId} 
+			and exam_name = #{examName}
+	</select>
+	
+	<insert id="insertHospitalExam" parameterType="com.hm.his.module.manage.model.HospitalExam" useGeneratedKeys="true" keyProperty="examId">
+		INSERT INTO hospital_exam (exam_name, exam_phoneticize_name, exam_abbreviation_name, exam_price, exam_cost, hospital_id, creater, flag) 
+		VALUES (#{examName}, #{examPhoneticizeName}, #{examAbbreviationName}, #{examPrice}, #{examCost}, #{hospitalId}, #{creater}, #{flag});
+	</insert>
+	
+	<update id="updateHospitalExam" parameterType="com.hm.his.module.manage.model.HospitalExam">
+		UPDATE hospital_exam set exam_name=#{examName}, exam_phoneticize_name=#{examPhoneticizeName}, 
+		exam_abbreviation_name=#{examAbbreviationName}, exam_price=#{examPrice}, exam_cost=#{examCost}, modifier=#{modifier} 
+		WHERE exam_id = #{examId}
+	</update>
+	
+	<update id="deleteHospitalExam">
+		UPDATE hospital_exam set flag=0 WHERE exam_id = #{examId} and hospital_id = #{hospitalId}
+	</update>
+
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientExamMapper">
+	<resultMap id="examResultMap" type="com.hm.his.module.outpatient.model.PatientExam">
+		<result column="id" property="patientExamId" />
+		<result column="record_id" property="recordId" />
+		<result column="patient_id" property="patientId" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="exam_id" property="examId" />
+		<result column="exam_name" property="examName" />
+		<result column="sample_id" property="sampleId" />
+		<result column="sample_name" property="sampleName" />
+		<result column="exam_result" property="examResult" />
+		<result column="unit" property="unit" />
+		<result column="create_date" property="createDate" />
+		<result column="price" property="price" />
+		<result column="exam_cost" property="examCost" />
+		<result column="data_source" property="dataSource" />
+		<result column="total" property="total" />
+	</resultMap>
+
+	<select id="getExamByRecordId" resultMap="examResultMap">
+		SELECT * FROM exam_result WHERE record_id = #{recordId} and status = 0
+	</select>
+
+	<insert id="insertExamList" parameterType="com.hm.his.module.outpatient.model.PatientExam" useGeneratedKeys="true" keyProperty="patientExamId">
+		INSERT INTO exam_result (record_id, patient_id, doctor_id, exam_id,
+			exam_name, price, exam_cost, sample_id, sample_name, exam_result, unit, status, data_source, total)
+		VALUES
+		<foreach collection="list" item="exam" index="index"
+			separator=",">
+			(
+				#{exam.recordId}, #{exam.patientId}, #{exam.doctorId}, #{exam.examId}, #{exam.examName},
+				#{exam.price}, #{exam.examCost}, #{exam.sampleId}, #{exam.sampleName}, #{exam.examResult}, #{exam.unit}, #{exam.status}, #{exam.dataSource}, #{exam.total}
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="insertExam" parameterType="com.hm.his.module.outpatient.model.PatientExam" useGeneratedKeys="true" keyProperty="patientExamId">
+		INSERT INTO exam_result (record_id, patient_id, doctor_id, exam_id,
+			exam_name, price, exam_cost, sample_id, sample_name, exam_result, unit, data_source, total)
+		VALUES (
+				#{recordId}, #{patientId}, #{doctorId}, #{examId}, #{examName}, 
+				#{price}, #{examCost}, #{sampleId}, #{sampleName}, #{examResult}, #{unit},  #{dataSource}, #{total}
+			)
+	</insert>
+	
+	<update id="updateExam" parameterType="com.hm.his.module.outpatient.model.PatientExam">
+		UPDATE 
+			exam_result SET exam_id = #{examId}, exam_name = #{examName}, 
+			price = #{price}, exam_cost = #{examCost}, data_source = #{dataSource}, total = #{total} 
+		WHERE id = #{patientExamId}
+	</update>
+
+	<update id="batchUpdateExam"  parameterType="com.hm.his.module.outpatient.model.PatientExam">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			UPDATE exam_result
+			<set>
+				exam_id = #{item.examId},
+				exam_name = #{item.examName},
+				price = #{item.price},
+				exam_cost = #{item.examCost},
+				data_source = #{item.dataSource},
+				total = #{item.total}
+			</set>
+			where id = ${item.patientExamId}
+		</foreach>
+	</update>
+
+
+	<update id="batchDeleteExam" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+			UPDATE exam_result
+			<set>
+				status = 1
+			</set>
+			where id = ${item.id}
+		</foreach>
+	</update>
+
+	<update id="deleteExam">
+		UPDATE exam_result SET status = 1 WHERE id = #{patientExamId}
+	</update>
+
+	<update id="delExamByRecordId">
+		UPDATE exam_result SET status = 1 WHERE record_id = #{recordId}
+	</update>
+</mapper>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.login.dao.FunctionMapper">
+	<resultMap id="functionResultMap" type="com.hm.his.module.login.model.Function">
+		<result column="function_id" property="functionId" />
+		<result column="function_name" property="functionName" />
+		<result column="function_pid" property="functionPid" />
+		<result column="function_url" property="functionUrl" />
+		<result column="flag" property="flag" />
+	</resultMap>
+	
+	<select id="getDoctorFunction" resultMap="functionResultMap">
+		select fu.function_id,fu.function_name,fu.function_pid,fu.function_url,fu.flag
+		from function_relation fr LEFT JOIN `function` fu on fr.function_id=fu.function_id where doctor_id = #{doctorId}
+	</select>
+	
+	<insert id="saveDoctorFunction" parameterType="com.hm.his.module.outpatient.model.PatientChineseDrugPieces">
+		INSERT INTO function_relation (function_id, doctor_id)
+		VALUES 
+		<foreach collection="functionIdList" item="functionId" index="index"
+			separator=",">
+			(#{functionId}, #{doctorId})
+		</foreach>
+	</insert>
+	
+	<delete id="deleteDoctorFunctionByDocId">
+		delete from function_relation where doctor_id = #{doctorId}
+	</delete>
+</mapper>

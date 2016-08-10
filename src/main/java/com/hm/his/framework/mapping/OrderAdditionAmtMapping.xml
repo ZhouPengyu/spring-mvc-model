@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.order.dao.OrderAdditionAmtMapper">
+	<resultMap id="BaseResultMap"
+		type="com.hm.his.module.order.model.OrderAdditionAmt">
+		<id column="id" property="id" />
+		<result column="amt_name" property="amtName" />
+		<result column="count" property="count" />
+		<result column="create_date" property="createDate" javaType="java.util.Date" />
+		<result column="modify_date" property="modifyDate" javaType="java.util.Date" />
+		<result column="order_item_list_id" property="orderItemListId" />
+		<result column="order_no" property="orderNo" />
+		<result column="receivable_amt" property="receivableAmt" />
+		<result column="sale_price" property="salePrice" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="additional_id" property="additionalId" />
+		<result column="record_id" property="recordId" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="creater" property="creater" />
+		<result column="real_name" property="doctorName" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		t.id, t.amt_name, t.count, t.create_date, t.modify_date,
+		t.order_item_list_id,
+		t.order_no,
+		t.sale_price,
+		t.additional_id,t.record_id,
+		a.charge_status,a.receivable_amt,hospital_id
+	</sql>
+	<sql id="OrderAdditionAmtAndOrderItemCharge">
+		t.id, t.amt_name, t.count, t.create_date, t.modify_date,
+		t.order_item_list_id,
+		t.order_no,
+		t.sale_price,
+		t.additional_id,
+		t.record_id ,t.hospital_id,
+		a.charge_status,a.receivable_amt
+	</sql>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		select
+		<include refid="OrderAdditionAmtAndOrderItemCharge" />
+		from
+		order_addition_amt
+		t,order_item_charge a
+		where t.id = #{id} and
+		t.id=a.item_id and a.item_type=3
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="OrderAdditionAmtAndOrderItemCharge" />
+		from
+		order_addition_amt
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=3
+	</select>
+	<select id="selectByOrderItemListIdAndChargeStatus" resultMap="BaseResultMap">
+		select
+		<include refid="OrderAdditionAmtAndOrderItemCharge" />
+		from
+		order_addition_amt t,order_item_charge a
+		where t.order_item_list_id
+		=
+		#{orderItemListId} and
+		t.id=a.item_id and a.item_type=3
+		<if test="chargeStatus==1">
+			and a.charge_status=1
+		</if>
+		<if test="chargeStatus!=1">
+			and a.charge_status &amp; #{chargeStatus}&gt;0
+		</if>
+	</select>
+	<select id="selectByRecordIdAndAdditionalId" resultMap="BaseResultMap">
+		select
+		<include refid="OrderAdditionAmtAndOrderItemCharge" />
+		from
+		order_addition_amt t,order_item_charge a
+		where
+		t.record_id=#{recordId}
+		and a.item_type=3
+		and
+		t.additional_id=#{additionalId}
+		and
+		t.id=a.item_id limit 1
+	</select>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from order_addition_amt
+		where id = #{id}
+	</delete>
+	<delete id="deleteByOrderItemListId" parameterType="java.lang.Long">
+		delete from
+		order_drug
+		where order_item_list_id
+		= #{orderItemListId}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.OrderAdditionAmt"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into order_addition_amt
+		(amt_name, count,
+		order_item_list_id,
+		order_no,
+		sale_price,
+		additional_id,record_id,hospital_id)
+		values (#{amtName}, #{count},
+		#{orderItemListId},
+		#{orderNo}, #{salePrice},
+		#{additionalId},#{recordId},#{hospitalId})
+	</insert>
+	<insert id="insertList" parameterType="com.hm.his.module.order.model.OrderAdditionAmt" useGeneratedKeys="true" keyProperty="id">
+		insert into order_addition_amt (amt_name, count,
+		order_item_list_id,
+		order_no, sale_price,
+		additional_id,record_id,hospital_id)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.amtName}, #{item.count},
+			#{item.orderItemListId},
+			#{item.orderNo}, #{item.salePrice},
+			#{item.additionalId},#{item.recordId},#{item.hospitalId})
+		</foreach>
+
+	</insert>
+
+	<update id="update" parameterType="com.hm.his.module.order.model.OrderAdditionAmt">
+		update order_addition_amt
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where id = #{id}
+	</update>
+	<sql id="setSql">
+		<if test="amtName != null">
+			amt_name = #{amtName},
+		</if>
+		<if test="count != null">
+			count = #{count},
+		</if>
+		<if test="createDate != null">
+			create_date = #{createDate},
+		</if>
+		<if test="modifyDate != null">
+			modify_date = #{modifyDate},
+		</if>
+		<if test="orderItemListId != null">
+			order_item_list_id = #{orderItemListId},
+		</if>
+		<if test="orderNo != null">
+			order_no = #{orderNo},
+		</if>
+		<if test="salePrice != null">
+			sale_price = #{salePrice},
+		</if>
+		<if test="additionalId != null">
+			additional_id = #{additionalId},
+		</if>
+		<if test="recordId != null">
+			record_id = #{recordId},
+		</if>
+		<if test="hospitalId != null">
+			hospital_id = #{hospitalId}
+		</if>
+	</sql>
+
+	<!-- 统计相关sql start -->
+	<resultMap id="AdditionAmtStatisticsPojo"
+		type="com.hm.his.module.statistics.pojo.AdditionAmtStatisticsPojo">
+		<result column="totalSaleAmt" property="totalSaleAmt" />
+		<result column="additionAmtCount" property="additionAmtCount" />
+	</resultMap>
+	<resultMap id="AdditionAmtStatisticsItemPojo"
+		type="com.hm.his.module.statistics.pojo.AdditionAmtStatisticsItemPojo">
+		<result column="amt_name" property="additionAmtName" />
+		<result column="count" property="count" />
+		<result column="sale_amt" property="saleAmt" />
+	</resultMap>
+
+	<select id="selectAdditionAmtStatisticsItemPojos" resultMap="AdditionAmtStatisticsItemPojo"
+		parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest">
+		select a.amt_name,count(*) count,sum(b.receivable_amt) sale_amt from
+		order_addition_amt a,order_item_charge b
+		where a.id=b.item_id and
+		b.item_type=3
+		and b.charge_status =2
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="additionAmtName !=null">
+			and a.amt_name like CONCAT('%',#{additionAmtName},'%')
+		</if>
+		<if test="startDate!=null">
+				<![CDATA[and  b.charge_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+				<![CDATA[and  b.charge_date <= #{endDate} ]]>
+		</if>
+		group by a.amt_name order by sale_amt desc
+		<if test="startRecord!=null and pageSize!=null">
+			limit #{startRecord},#{pageSize}
+		</if>
+	</select>
+	<select id="selectCountOfAdditionAmtStatisticsItemPojos"
+		resultType="java.lang.Integer" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest">
+		select count(*) from (
+		select count(*) from
+		order_addition_amt
+		a,order_item_charge b
+		where a.id=b.item_id and
+		b.item_type=3
+		and
+		b.charge_status =2
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="additionAmtName !=null">
+			and a.amt_name like CONCAT('%',#{additionAmtName},'%')
+		</if>
+		<if test="startDate!=null">
+							<![CDATA[ and b.charge_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+							<![CDATA[ and b.charge_date <= #{endDate} ]]>
+		</if>
+		group by a.amt_name
+		) t;
+	</select>
+	<select id="selectTotalSaleAmtAndCount" resultMap="AdditionAmtStatisticsPojo"
+		parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest">
+		select count(*) additionAmtCount ,sum(b.receivable_amt) totalSaleAmt from
+		order_addition_amt a,order_item_charge b
+		where a.id=b.item_id and b.item_type=3
+		and b.charge_status =2
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="additionAmtName !=null">
+			and a.amt_name like CONCAT('%',#{additionAmtName},'%')
+		</if>
+		<if test="startDate!=null">
+				<![CDATA[and  b.charge_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+				<![CDATA[and  b.charge_date <= #{endDate} ]]>
+		</if>
+	</select>
+
+	<select id="selectLoadsAdditionalStatistics" resultMap="BaseResultMap"
+			parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest">
+		SELECT t1.creater, t1.order_no,
+		t1.modify_date, t1.receivable_amt, t1.real_name, oa.additional_id,
+		oa.amt_name, oa.sale_price, oa.count FROM order_addition_amt oa
+		JOIN
+		(
+			SELECT t2.creater, t2.order_no, t2.modify_date, t2.item_id, t2.receivable_amt, t2.item_type, d.real_name FROM doctor d
+			JOIN(
+				SELECT ho.creater, ho.order_no, oic.modify_date, oic.item_id, oic.receivable_amt, oic.item_type FROM hospital_order ho
+				JOIN order_item_charge oic
+				ON
+				ho.order_no = oic.order_no
+				WHERE oic.charge_status=2
+				<if test="hospitalId != null">
+					AND ho.hospital_id = #{hospitalId}
+				</if>
+				<if test="doctorName !=null">
+					AND ho.creater in(
+					SELECT doctor_id creater
+					FROM doctor
+					WHERE real_name LIKE CONCAT('%',#{doctorName},'%'))
+				</if>
+				<if test="startDate!=null">
+					<![CDATA[and  oic.modify_date >= #{startDate} ]]>
+				</if>
+				<if test="endDate!=null">
+					<![CDATA[and  oic.modify_date <= #{endDate} ]]>
+				</if>
+			)t2
+			ON d.doctor_id = t2.creater
+		)t1
+		on t1.item_id = oa.id
+		WHERE t1.item_type=3
+		<if test="drugType !=18 and drugType !=null">
+			AND oa.amt_name='无关查询'
+		</if>
+	</select>
+	<!-- 统计相关sql end -->
+</mapper>

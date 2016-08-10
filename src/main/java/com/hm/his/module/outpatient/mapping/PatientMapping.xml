@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientMapper">
+	<resultMap id="patientResultMap" type="com.hm.his.module.outpatient.model.Patient">
+		<result column="patient_id" property="patientId" />
+		<result column="patient_card_id" property="patientCardId" />
+		<result column="patient_name" property="patientName" />
+		<result column="gender" property="gender" />
+		<result column="medical_record_id" property="medicalRecordId" />
+		<result column="birthday" property="birthday" />
+		<result column="ID_card_no" property="idCardNo" />
+		<result column="MI_card_no" property="miCardNo" />
+		<result column="phone_no" property="phoneNo" />
+		<result column="address" property="address" />
+		<result column="linkman" property="linkman" />
+		<result column="payer" property="payer" />
+		<result column="pay_type" property="payType" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="patient_pinyin" property="patientPinyin" />
+		<result column="age" property="age" />
+		<result column="age_type" property="ageType" />
+		<result column="linkman_phone" property="linkmanPhone" />
+		<result column="comment" property="comment" />
+		<result column="diagnosis_date" property="diagnosisDate" />
+	</resultMap>
+
+	<select id="getPatientById" resultMap="patientResultMap">
+		SELECT * FROM patient where patient_id = #{patientId}
+	</select>
+	
+	<select id="findPatientListByIds" resultMap="patientResultMap" parameterType="java.util.List">
+		SELECT * FROM patient where patient_id in
+		<foreach collection="list" index="index" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+	</select>
+
+	<select id="searchPatientBySug" resultMap="patientResultMap">
+		SELECT * FROM patient where
+		<if test="patientName != null and patientName != ''">
+			patient_name like CONCAT(#{patientName}, '%')
+		</if>
+		<if test="patientPinyin != null and patientPinyin != ''">
+			patient_pinyin like CONCAT(#{patientPinyin}, '%')
+		</if>
+		and doctor_id in (select doctor_id from doctor where hospital_id = #{hospitalId}) 
+		limit 10
+	</select>
+
+	<insert id="insertPatient" parameterType="com.hm.his.module.outpatient.model.Patient" useGeneratedKeys="true" keyProperty="patientId">
+		INSERT INTO patient (patient_id, patient_card_id, patient_name, gender, age, age_type, medical_record_id, 
+			birthday,ID_card_no,MI_card_no,	phone_no, address, linkman, linkman_phone, payer, pay_type, doctor_id, 
+			patient_pinyin,comment, diagnosis_date)
+		VALUES (#{patientId}, #{patientCardId}, #{patientName}, #{gender}, #{age}, 
+			#{ageType}, #{medicalRecordId}, #{birthday}, #{idCardNo}, #{miCardNo}, 
+			#{phoneNo}, #{address}, #{linkman}, #{linkmanPhone}, #{payer}, #{payType}, 
+			#{doctorId}, #{patientPinyin}, #{comment}, #{diagnosisDate});
+	</insert>
+
+	<update id="updatePatient" parameterType="com.hm.his.module.outpatient.model.Patient">
+		UPDATE patient
+		<set>
+			patient_id = #{patientId},
+			patient_card_id = #{patientCardId},
+			patient_name = #{patientName},
+			gender = #{gender},
+			age = #{age},
+			age_type = #{ageType},
+			medical_record_id = #{medicalRecordId},
+			birthday = #{birthday},
+			ID_card_no = #{idCardNo},
+			MI_card_no = #{miCardNo},
+			phone_no = #{phoneNo},
+			address = #{address},
+			linkman = #{linkman},
+			linkman_phone = #{linkmanPhone},
+			payer = #{payer},
+			pay_type = #{payType},
+			doctor_id = #{doctorId},
+			comment = #{comment},
+			diagnosis_date = #{diagnosisDate}
+		</set>
+		WHERE patient_id = #{patientId}
+	</update>
+
+	<select id="searchPatientByDoctorId" resultMap="patientResultMap">
+		SELECT * FROM patient where 
+		<if test="doctorId != null">
+			patient_id in (select patient_id from doctor_patient_relation where doctor_id = #{doctorId}) 
+		</if>
+		<if test="hospitalId != null">
+			doctor_id in (select doctor_id from doctor where hospital_id = #{hospitalId}) 
+		</if>
+		<if test="diagnosisDateStart != null">
+			and (diagnosis_date >= #{diagnosisDateStart} and diagnosis_date <![CDATA[ <= ]]> #{diagnosisDate})
+		</if>
+		<if test="patientConditions != null and patientConditions != ''">
+			and (
+				patient_name like CONCAT(#{patientConditions}, '%') 
+				or 
+				patient_pinyin like CONCAT(#{patientConditions}, '%') 
+				or 
+				phone_no like CONCAT(#{patientConditions}, '%')
+			)
+		</if>
+		order by diagnosis_date desc, create_date desc 
+		<if test="pageSize != null">
+			limit #{startPage},#{pageSize}
+		</if>
+	</select>
+
+	<select id="searchPatientWithValidPhone" resultMap="patientResultMap">
+		SELECT * FROM patient where
+		<if test="hospitalId != null">
+			doctor_id in (select doctor_id from doctor where hospital_id = #{hospitalId})
+		</if>
+		<if test="diagnosisDateStart != null">
+			and (diagnosis_date >= #{diagnosisDateStart} and diagnosis_date <![CDATA[ <= ]]> #{diagnosisDate})
+		</if>
+		<if test="phoneReg != null">
+			and phone_no REGEXP #{phoneReg}
+		</if>
+		<if test="patientConditions != null and patientConditions != ''">
+			and (
+			patient_name like CONCAT(#{patientConditions}, '%')
+			or
+			patient_pinyin like CONCAT(#{patientConditions}, '%')
+			or
+			phone_no like CONCAT(#{patientConditions}, '%')
+			)
+		</if>
+		order by diagnosis_date desc, create_date desc
+		<if test="pageSize != null">
+			limit #{startRecord}, #{pageSize}
+		</if>
+	</select>
+
+	<select id="searchPatientWithValidPhoneCount" resultType="java.lang.Integer">
+		SELECT count(*) FROM patient where
+		<if test="hospitalId != null">
+			doctor_id in (select doctor_id from doctor where hospital_id = #{hospitalId})
+		</if>
+		<if test="diagnosisDateStart != null">
+			and (diagnosis_date >= #{diagnosisDateStart} and diagnosis_date <![CDATA[ <= ]]> #{diagnosisDate})
+		</if>
+		<if test="phoneReg != null">
+			and phone_no REGEXP #{phoneReg}
+		</if>
+		<if test="patientConditions != null and patientConditions != ''">
+			and (
+			patient_name like CONCAT(#{patientConditions}, '%')
+			or
+			patient_pinyin like CONCAT(#{patientConditions}, '%')
+			or
+			phone_no like CONCAT(#{patientConditions}, '%')
+			)
+		</if>
+	</select>
+
+	<select id="searchPatientTotalByDoctorId" resultType="java.lang.Integer">
+		SELECT count(patient_id) FROM patient where 
+		<if test="doctorId != null">
+			patient_id in (select patient_id from doctor_patient_relation where doctor_id = #{doctorId}) 
+		</if>
+		<if test="hospitalId != null">
+			doctor_id in (select doctor_id from doctor where hospital_id = #{hospitalId}) 
+		</if>
+		<if test="diagnosisDateStart != null">
+			and (diagnosis_date >= #{diagnosisDateStart} and diagnosis_date <![CDATA[ <= ]]> #{diagnosisDate})
+		</if>
+		<if test="patientConditions != null and patientConditions != ''">
+			and 
+				(patient_name like CONCAT(#{patientConditions}, '%') 
+			or 
+				patient_pinyin like CONCAT(#{patientConditions}, '%') 
+			or 
+				phone_no like CONCAT(#{patientConditions}, '%'))
+		</if>
+	</select>
+
+	<select id="searchDocContainPatient" resultMap="patientResultMap">
+		SELECT * FROM patient where patient_id in (select patient_id from doctor_patient_relation where doctor_id = #{doctorId} and patient_id = #{patientId})
+	</select>
+	
+	<select id="getPatientSeq" resultType="java.lang.Integer">
+		SELECT NEXTVAL ('PATIENT_SEQ') as NEXTVAL
+	</select>
+</mapper>

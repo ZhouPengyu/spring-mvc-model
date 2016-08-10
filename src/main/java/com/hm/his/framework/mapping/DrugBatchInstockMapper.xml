@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.instock.dao.DrugBatchInstockMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.instock.model.DrugBatchInstock" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="batch_instock_id" property="batchInstockId" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_id" property="drugId" jdbcType="INTEGER" />
+    <result column="instock_count" property="instockCount" jdbcType="DOUBLE" />
+    <result column="instock_unit" property="instockUnit" jdbcType="VARCHAR" />
+    <result column="surplus_count" property="surplusCount" jdbcType="DOUBLE" />
+    <result column="validity_date" property="validityDate" jdbcType="TIMESTAMP" />
+    <result column="drug_batch_no" property="drugBatchNo" jdbcType="VARCHAR" />
+    <result column="purchase_price" property="purchasePrice" jdbcType="DOUBLE" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+  </resultMap>
+
+  <resultMap id="HospitalResultMap" type="com.hm.his.module.instock.pojo.HospitalDrugInventoryPojo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_name" property="drugName" jdbcType="VARCHAR" />
+    <result column="drug_type" property="drugType" jdbcType="INTEGER" />
+    <result column="is_otc" property="isOtc" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="approval_number" property="approvalNumber" jdbcType="VARCHAR" />
+    <result column="bar_code" property="barCode" jdbcType="VARCHAR" />
+    <result column="spec_minimum_dosage" property="specMinimumDosage" jdbcType="DOUBLE" />
+    <result column="specification" property="specification" jdbcType="VARCHAR" />
+    <result column="spec_minimum_unit" property="specMinimumUnit" jdbcType="VARCHAR" />
+    <result column="spec_unit" property="specUnit" jdbcType="VARCHAR" />
+    <result column="spec_unitary_ratio" property="specUnitaryRatio" jdbcType="INTEGER" />
+    <result column="spec_package_unit" property="specPackageUnit" jdbcType="VARCHAR" />
+    <result column="manufacturer" property="manufacturer" jdbcType="VARCHAR" />
+    <result column="purchase_price" property="purchasePrice" jdbcType="DOUBLE" />
+    <result column="prescription_price" property="prescriptionPrice" jdbcType="DOUBLE" />
+    <result column="open_stock" property="openStock" jdbcType="INTEGER" />
+    <result column="inventory_count" property="inventoryCount" jdbcType="DOUBLE" />
+    <result column="supplier" property="supplier" jdbcType="VARCHAR" />
+    <result column="batch_no" property="batchNo" jdbcType="VARCHAR" />
+    <result column="batch_instock_id" property="batchInstockId" jdbcType="INTEGER" />
+    <result column="drug_batch_instock_id" property="drugBatchInstockId" jdbcType="INTEGER" />
+    <result column="instock_count" property="instockCount" jdbcType="DOUBLE" />
+    <result column="surplus_count" property="surplusCount" jdbcType="DOUBLE" />
+    <result column="instock_unit" property="instockUnit" jdbcType="VARCHAR" />
+    <result column="validity_date" property="validityDate" jdbcType="TIMESTAMP" />
+    <result column="drug_batch_no" property="drugBatchNo" jdbcType="VARCHAR" />
+    <result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, batch_instock_id, hospital_id, drug_id, instock_count, instock_unit, surplus_count, 
+    validity_date, drug_batch_no, purchase_price, flag
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from drug_batch_instock
+    where id = #{id}
+  </select>
+
+
+  <select id="searchBatchDrugInventoryDetail" resultMap="HospitalResultMap" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    hd.id,hd.hospital_id,hd.drug_name,hd.drug_type,hd.specification,hd.spec_package_unit,
+    hd.spec_unit,hd.spec_unitary_ratio,hd.open_stock, hd.manufacturer,hd.prescription_price,hd.bar_code,hd.status,hd.is_otc,
+    dbi.purchase_price,dbi.id as drug_batch_instock_id,dbi.batch_instock_id,dbi.surplus_count,dbi.instock_count,dbi.instock_unit,dbi.validity_date,dbi.drug_batch_no
+
+    from drug_batch_instock dbi
+    LEFT JOIN hospital_drug hd on dbi.drug_id= hd.id
+    where dbi.id=#{drugBatchInstockId} and dbi.drug_id=#{drugId};
+  </select>
+
+
+  <select id="searchDrugBatchInstockAndSurplusGreaterThanZero" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from drug_batch_instock where drug_id=#{drugId} and surplus_count > 0 order by id
+  </select>
+
+  <select id="searchDrugBatchInstockByDrugId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from drug_batch_instock where drug_id=#{drugId}  order by id desc limit 1;
+  </select>
+
+  <select id="searchDrugInventoryListByBatch" resultMap="HospitalResultMap" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select
+    hd.id,hd.hospital_id,hd.drug_name,hd.drug_type,hd.specification,hd.spec_minimum_dosage,hd.spec_minimum_unit,hd.spec_package_unit,
+    hd.spec_unit,hd.spec_unitary_ratio,
+    hd.open_stock, hd.manufacturer,hd.prescription_price,dbi.purchase_price,bi.supplier,dbi.surplus_count,dbi.id as drug_batch_instock_id,bi.batch_no,di.inventory_count
+
+    from drug_batch_instock dbi
+    LEFT JOIN hospital_drug hd on dbi.drug_id= hd.id
+    LEFT JOIN batch_instock bi on dbi.batch_instock_id=bi.id
+    LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where dbi.hospital_id=#{hospitalId} and hd.flag=1
+    <if test="status!=null">
+      and hd.status=#{status}
+    </if>
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    <if test="drugName!=null and drugName!=''">
+      and (hd.drug_name like CONCAT('%',#{drugName},'%') or hd.approval_number like CONCAT('%',#{drugName},'%') or hd.manufacturer like CONCAT('%',#{drugName},'%')
+      or hd.pinyin like CONCAT(#{drugName},'%')  or hd.pinyin_first like CONCAT(#{drugName},'%')
+      or hd.pinyin like CONCAT('%[',#{drugName},'%')  or hd.pinyin_first like CONCAT('%[',#{drugName},'%')
+      or hd.bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    order by bi.batch_no desc limit #{startRecord},#{pageSize}
+  </select>
+
+
+  <select id="searchBatchInstockLog" resultMap="HospitalResultMap" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    hd.id,hd.hospital_id,drug_name,drug_type,specification,hd.spec_package_unit, manufacturer,dbi.instock_count,dbi.instock_unit,bi.batch_no,bi.supplier,bi.create_date,dbi.purchase_price
+    from batch_instock bi LEFT JOIN drug_batch_instock dbi on bi.id = dbi.batch_instock_id
+    LEFT JOIN  hospital_drug hd  on dbi.drug_id= hd.id
+    where  hd.hospital_id=#{hospitalId} and hd.flag=1 and dbi.flag=1
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and bi.create_date BETWEEN str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')  AND str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+    <if test="drugName!=null and drugName!=''">
+      and (hd.drug_name like CONCAT('%',#{drugName},'%') or hd.approval_number like CONCAT('%',#{drugName},'%') or hd.manufacturer like CONCAT('%',#{drugName},'%')
+      or hd.pinyin like CONCAT(#{drugName},'%')  or hd.pinyin_first like CONCAT(#{drugName},'%')
+      or hd.pinyin like CONCAT('%[',#{drugName},'%')  or hd.pinyin_first like CONCAT('%[',#{drugName},'%')
+      or hd.bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+    order by bi.create_date
+    <if test="isDescSort == 1">
+       desc
+    </if>
+
+    <if test="pageSize!=null">
+      limit #{startRecord},#{pageSize}
+    </if>
+  </select>
+
+  <select id="countBatchInstockLog" resultType="java.lang.Integer" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    count(1)
+    from batch_instock bi LEFT JOIN drug_batch_instock dbi on bi.id = dbi.batch_instock_id
+    LEFT JOIN  hospital_drug hd  on dbi.drug_id= hd.id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1  and dbi.flag=1
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and bi.create_date BETWEEN str_to_date(#{startDate},'%Y-%m-%d %H:%i:%s')  AND str_to_date(#{endDate},'%Y-%m-%d %H:%i:%s')
+    <if test="drugName!=null and drugName!=''">
+      and (hd.drug_name like CONCAT('%',#{drugName},'%') or hd.approval_number like CONCAT('%',#{drugName},'%') or hd.manufacturer like CONCAT('%',#{drugName},'%')
+      or hd.pinyin like CONCAT(#{drugName},'%')  or hd.pinyin_first like CONCAT(#{drugName},'%')
+      or hd.pinyin like CONCAT('%[',#{drugName},'%')  or hd.pinyin_first like CONCAT('%[',#{drugName},'%')
+      or hd.bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+  </select>
+
+
+
+  <select id="searchDrugListForValidityWarning" resultMap="HospitalResultMap" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    hd.id,hd.hospital_id,drug_name,drug_type,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,
+    spec_unit,spec_unitary_ratio, open_stock, manufacturer,dbi.surplus_count,dbi.validity_date,bi.batch_no,bi.id as batch_instock_id
+    from hospital_drug hd LEFT JOIN drug_batch_instock dbi on hd.id = dbi.drug_id
+    LEFT JOIN batch_instock bi on dbi.batch_instock_id= bi.id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1 and dbi.surplus_count <![CDATA[ > ]]> 0
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and dbi.validity_date <![CDATA[<=]]> #{compareValidityDate}
+    order by dbi.validity_date limit #{startRecord},#{pageSize}
+  </select>
+
+  <select id="countDrugListForValidityWarning" resultType="java.lang.Integer" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    count(1)
+    from hospital_drug hd LEFT JOIN drug_batch_instock dbi on hd.id = dbi.drug_id
+    LEFT JOIN batch_instock bi on dbi.batch_instock_id= bi.id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1 and dbi.surplus_count <![CDATA[ > ]]> 0
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and dbi.validity_date <![CDATA[<=]]> #{compareValidityDate}
+  </select>
+
+
+
+
+  <select id="countDrugInventoryListByBatch" resultType="java.lang.Integer" parameterType="com.hm.his.module.drug.pojo.DrugRequest" >
+    select
+    count(1)
+    from drug_batch_instock dbi
+    LEFT JOIN hospital_drug hd on dbi.drug_id= hd.id
+    LEFT JOIN batch_instock bi on dbi.batch_instock_id=bi.id
+    LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where dbi.hospital_id=#{hospitalId} and hd.flag=1
+    <if test="status!=null">
+      and hd.status=#{status}
+    </if>
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+
+    <if test="drugName!=null and drugName!=''">
+      and (drug_name like CONCAT('%',#{drugName},'%') or approval_number like CONCAT('%',#{drugName},'%') or manufacturer like CONCAT('%',#{drugName},'%')
+      or pinyin like CONCAT(#{drugName},'%')  or pinyin_first like CONCAT(#{drugName},'%')
+      or pinyin like CONCAT('%[',#{drugName},'%')  or pinyin_first like CONCAT('%[',#{drugName},'%')
+      or bar_code like CONCAT('%',#{drugName},'%') )
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from drug_batch_instock
+    where id = #{id}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    insert into drug_batch_instock (id, batch_instock_id, hospital_id, 
+      drug_id, instock_count, instock_unit, 
+      surplus_count, validity_date, drug_batch_no, 
+      purchase_price, flag)
+    values (#{id,jdbcType=INTEGER}, #{batchInstockId,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, 
+      #{drugId,jdbcType=INTEGER}, #{instockCount,jdbcType=DOUBLE}, #{instockUnit,jdbcType=VARCHAR},
+      #{surplusCount,jdbcType=DOUBLE}, #{validityDate,jdbcType=TIMESTAMP}, #{drugBatchNo,jdbcType=VARCHAR},
+      #{purchasePrice,jdbcType=DOUBLE}, #{flag,jdbcType=INTEGER})
+  </insert>
+
+  <insert id="batchInsertByList" parameterType="com.hm.his.module.instock.model.DrugBatchInstock">
+    insert into drug_batch_instock (batch_instock_id, hospital_id,
+    drug_id, instock_count, instock_unit,
+    surplus_count, validity_date, drug_batch_no,
+    purchase_price, flag)
+    values
+    <foreach collection="list" item="drugs" index="index"
+             separator=",">
+      (#{drugs.batchInstockId,jdbcType=INTEGER}, #{drugs.hospitalId,jdbcType=INTEGER},
+      #{drugs.drugId,jdbcType=INTEGER}, #{drugs.instockCount,jdbcType=DOUBLE}, #{drugs.instockUnit,jdbcType=VARCHAR},
+      #{drugs.surplusCount,jdbcType=DOUBLE}, #{drugs.validityDate,jdbcType=TIMESTAMP}, #{drugs.drugBatchNo,jdbcType=VARCHAR},
+      #{drugs.purchasePrice,jdbcType=DOUBLE}, #{drugs.flag,jdbcType=INTEGER})
+    </foreach>
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    insert into drug_batch_instock
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="batchInstockId != null" >
+        batch_instock_id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="drugId != null" >
+        drug_id,
+      </if>
+      <if test="instockCount != null" >
+        instock_count,
+      </if>
+      <if test="instockUnit != null" >
+        instock_unit,
+      </if>
+      <if test="surplusCount != null" >
+        surplus_count,
+      </if>
+      <if test="validityDate != null" >
+        validity_date,
+      </if>
+      <if test="drugBatchNo != null" >
+        drug_batch_no,
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price,
+      </if>
+      <if test="flag != null" >
+        flag,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="batchInstockId != null" >
+        #{batchInstockId,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="instockCount != null" >
+        #{instockCount,jdbcType=DOUBLE},
+      </if>
+      <if test="instockUnit != null" >
+        #{instockUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="surplusCount != null" >
+        #{surplusCount,jdbcType=DOUBLE},
+      </if>
+      <if test="validityDate != null" >
+        #{validityDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="drugBatchNo != null" >
+        #{drugBatchNo,jdbcType=VARCHAR},
+      </if>
+      <if test="purchasePrice != null" >
+        #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="flag != null" >
+        #{flag,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    update drug_batch_instock
+    <set >
+      <if test="batchInstockId != null" >
+        batch_instock_id = #{batchInstockId,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        drug_id = #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="instockCount != null" >
+        instock_count = #{instockCount,jdbcType=DOUBLE},
+      </if>
+      <if test="instockUnit != null" >
+        instock_unit = #{instockUnit,jdbcType=VARCHAR},
+      </if>
+      <if test="surplusCount != null" >
+        surplus_count = #{surplusCount,jdbcType=DOUBLE},
+      </if>
+      <if test="validityDate != null" >
+        validity_date = #{validityDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="drugBatchNo != null" >
+        drug_batch_no = #{drugBatchNo,jdbcType=VARCHAR},
+      </if>
+      <if test="purchasePrice != null" >
+        purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      </if>
+      <if test="flag != null" >
+        flag = #{flag,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    update drug_batch_instock
+    set batch_instock_id = #{batchInstockId,jdbcType=INTEGER},
+      hospital_id = #{hospitalId,jdbcType=INTEGER},
+      drug_id = #{drugId,jdbcType=INTEGER},
+      instock_count = #{instockCount,jdbcType=DOUBLE},
+      instock_unit = #{instockUnit,jdbcType=VARCHAR},
+      surplus_count = #{surplusCount,jdbcType=DOUBLE},
+      validity_date = #{validityDate,jdbcType=TIMESTAMP},
+      drug_batch_no = #{drugBatchNo,jdbcType=VARCHAR},
+      purchase_price = #{purchasePrice,jdbcType=DOUBLE},
+      flag = #{flag,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateSurplusCountByDrugBatchInstock" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    update drug_batch_instock set surplus_count = #{surplusCount,jdbcType=DOUBLE}
+    where id = #{id,jdbcType=INTEGER} and drug_id = #{drugId,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateSurplusCountForReturnInventory" parameterType="com.hm.his.module.instock.model.DrugBatchInstock" >
+    update drug_batch_instock set surplus_count = surplus_count + #{surplusCount,jdbcType=DOUBLE}
+    where id = #{id,jdbcType=INTEGER} and drug_id = #{drugId,jdbcType=INTEGER}
+  </update>
+
+  <update id="cleanInsockDrugSurplusCountByHospitalId" parameterType="java.lang.Long" >
+    update drug_batch_instock set surplus_count = 0
+    where hospital_id = #{hospitalId,jdbcType=INTEGER}
+  </update>
+
+
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.purchase.dao.PurchaseOrderDrugMapper">
+	<resultMap id="purchaseOrderDrugResultMap" type="com.hm.his.module.purchase.model.PurchaseOrderDrug">
+		<result column="purchase_order_drug_id" property="purchaseOrderDrugId" jdbcType="INTEGER" />
+		<result column="purchase_order_id" property="purchaseOrderId" jdbcType="INTEGER" />
+		<result column="drug_id" property="drugId" jdbcType="INTEGER" />
+		<result column="drug_name" property="drugName" jdbcType="VARCHAR" />
+		<result column="drug_specification" property="drugSpecification" jdbcType="VARCHAR" />
+		<result column="purchase_drug_manufacturers" property="purchaseDrugManufacturers" jdbcType="VARCHAR" />
+		<result column="purchase_quantity" property="purchaseQuantity" jdbcType="INTEGER" />
+		<result column="package_unit" property="packageUnit" jdbcType="VARCHAR" />
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+	</resultMap>
+	
+	<select id="getPurchaseOrderDrugList" resultMap="purchaseOrderDrugResultMap">
+		select purchase_order_drug_id, purchase_order_id, drug_id, drug_name, 
+			drug_specification, purchase_drug_manufacturers, purchase_quantity, package_unit  
+		from purchase_order_drug where flag = 1 and purchase_order_id = #{purchaseOrderId}
+	</select>
+	
+	<select id="getPurchaseOrderDrug" resultMap="purchaseOrderDrugResultMap">
+		select purchase_order_drug_id, purchase_order_id, drug_id, drug_name, 
+			drug_specification, purchase_drug_manufacturers, purchase_quantity, package_unit  
+		from purchase_order_drug where flag = 1 and purchase_order_id = #{purchaseOrderId} and drug_id = #{drugId}
+	</select>
+	
+	<insert id="insertPurchaseOrderDrug" parameterType="java.util.List">
+		insert into 
+		purchase_order_drug 
+			(
+				purchase_order_id, drug_id, drug_name, drug_specification, 
+				purchase_drug_manufacturers, purchase_quantity, package_unit, flag
+			)
+		values 
+		<foreach collection="list" item="drug" index="index" separator=",">
+			(
+				#{purchaseOrderId}, #{drug.drugId}, #{drug.drugName}, #{drug.drugSpecification}, 
+				#{drug.purchaseDrugManufacturers}, #{drug.purchaseQuantity}, #{drug.packageUnit}, 1
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="insert" parameterType="com.hm.his.module.purchase.model.PurchaseOrderDrug">
+		insert into 
+			purchase_order_drug 
+				(
+					purchase_order_id, drug_id, drug_name, drug_specification, 
+					purchase_drug_manufacturers, purchase_quantity, package_unit
+				)
+			values 
+				(
+					#{purchaseOrderId}, #{drugId}, #{drugName}, #{drugSpecification}, 
+					#{purchaseDrugManufacturers}, #{purchaseQuantity}, #{packageUnit}
+				)
+	</insert>
+	<update id="deleteDrugByOrderId">
+		update purchase_order_drug
+		<set>
+			flag = 0
+		</set>
+		where purchase_order_id = #{purchaseOrderId}
+	</update>
+</mapper>

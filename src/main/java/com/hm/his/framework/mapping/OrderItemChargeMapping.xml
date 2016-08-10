@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.order.dao.OrderItemChargeMapper">
+	<resultMap id="BaseResultMap" type="com.hm.his.module.order.model.OrderItemCharge">
+		<id column="id" property="id" />
+		<result column="item_id" property="itemId" />
+		<result column="item_type" property="itemType" />
+		<result column="item_list_id" property="itemListId" />
+		<result column="order_no" property="orderNo" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="create_date" property="createDate" />
+		<result column="creater" property="creater" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="modifier" property="modifier" />
+		<result column="receivable_amt" property="receivableAmt" />
+		<result column="record_id" property="recordId" />
+		<result column="charge_date" property="chargeDate" />
+		<result column="charge_operator" property="chargeOperator" />
+		<result column="refund_date" property="refundDate" />
+		<result column="refund_operator" property="refundOperator" />
+	</resultMap>
+	<resultMap id="OrderItemChargeReceivableAmtPojoMap"
+		type="com.hm.his.module.order.pojo.OrderItemChargeReceivableAmtPojo">
+		<result column="order_no" property="orderNo" />
+		<result column="amt" property="amt" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, item_id, item_type, item_list_id, order_no,
+		charge_status,
+		create_date, creater,
+		modify_date, modifier,
+		receivable_amt,record_id,charge_date,charge_operator,refund_date,refund_operator
+	</sql>
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge
+		where id = #{id}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge
+	</select>
+	<select id="selectByItemIdAndItemType" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge
+		where item_id = #{itemId} and
+		item_type=#{itemType}
+	</select>
+	<select id="selectOrderItemChargesByItemListIdAndChargeStatus"
+		resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge
+		where item_list_id = #{itemListId} and
+		charge_status = #{chargeStatus}
+	</select>
+	<select id="selectByItemListId" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge
+		where item_list_id = #{itemListId}
+	</select>
+	<select id="selectOrderItemChargesByItemIds" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List" />
+		from order_item_charge where item_id in
+		<foreach item="item" index="index" collection="itemIds" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+	<select id="selectReceivableAmtSumByOrderNoAndChargeStatus"
+		resultType="java.lang.Double">
+		select sum(receivable_amt) from order_item_charge where
+		order_no=#{orderNo} and charge_status=#{chargeStatus}
+	</select>
+	<select id="selectReceivableAmtSumByOrderNosAndChargeStatus"
+		resultMap="OrderItemChargeReceivableAmtPojoMap">
+		select order_no, sum(receivable_amt) amt from order_item_charge where
+		order_no in
+		<foreach item="item" index="index" collection="orderNos" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+		and charge_status=#{chargeStatus}
+		group by order_no
+	</select>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from order_item_charge
+		where id = #{id}s
+	</delete>
+	<delete id="deleteByItemListId" parameterType="java.lang.Long">
+		delete from
+		order_item_charge
+		where item_list_id = #{itemListId}
+	</delete>
+	<delete id="deleteByItemIdAndItemType">
+		delete from order_item_charge
+		where item_id =
+		#{itemId} and item_type=#{itemType}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.OrderItemCharge">
+		insert into order_item_charge
+		(id, item_id, item_type,
+		item_list_id, order_no, charge_status,
+		creater,
+		modifier,
+		receivable_amt,record_id,charge_date,charge_operator,refund_date,refund_operator)
+		values
+		(#{id}, #{itemId},
+		#{itemType},
+		#{itemListId}, #{orderNo},
+		#{chargeStatus},
+		#{creater},
+		#{modifier},
+		#{receivableAmt},#{recordId},#{chargeDate},#{chargeOperator},#{refundDate},#{refundOperator})
+	</insert>
+	<insert id="insertList" parameterType="java.util.List">
+		insert into order_item_charge
+		(id, item_id, item_type,
+		item_list_id,
+		order_no, charge_status,
+		creater,
+		modifier,
+		receivable_amt,record_id,charge_date,charge_operator,refund_date,refund_operator)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id}, #{item.itemId}, #{item.itemType},
+			#{item.itemListId}, #{item.orderNo},
+			#{item.chargeStatus},
+			#{item.creater},
+			#{item.modifier},
+			#{item.receivableAmt},#{item.recordId},#{item.chargeDate},#{item.chargeOperator},#{item.refundDate},#{item.refundOperator})
+		</foreach>
+		<selectKey resultType="long" keyProperty="id" order="AFTER">
+			SELECT
+			LAST_INSERT_ID() as id
+		</selectKey>
+	</insert>
+	<update id="update" parameterType="com.hm.his.module.order.model.OrderItemCharge">
+		update order_item_charge
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where id = #{id}
+	</update>
+	<update id="updateOrderItemChargeStatusByItemListId"
+		parameterType="com.hm.his.module.order.model.OrderItemCharge">
+		update order_item_charge set
+		charge_status=#{chargeStatus}
+		where item_list_id = #{itemListId}
+	</update>
+	<update id="updateOrderItemChargeStatusByIds">
+		update order_item_charge set
+		charge_status=#{chargeStatus}
+		where id in
+		<foreach item="item" index="index" collection="ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	<update id="addChargeStatusToOrderItemCharges" parameterType="com.hm.his.module.order.model.OrderItemCharge">
+		update order_item_charge set
+		charge_status=charge_status |
+		#{chargeStatus}
+		where item_id in
+		<foreach item="item" index="index" collection="itemIds" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+	<update id="updateChargeOperatorAndDateByItemListId">
+		update order_item_charge set
+		charge_date=#{chargeDate} , charge_operator=#{chargeOperator}
+		where
+		item_list_id = #{itemListId}
+	</update>
+	<update id="updateRefundOperatorAndDateByItemIds">
+		update order_item_charge set
+		refund_date = #{refundDate} ,
+		refund_operator = #{refundOperator}
+		where item_id
+		in
+		<foreach item="item" index="index" collection="itemIds" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<sql id="setSql">
+		<if test="itemId != null">
+			item_id = #{itemId},
+		</if>
+		<if test="itemType != null">
+			item_type = #{itemType},
+		</if>
+		<if test="itemListId != null">
+			item_list_id = #{itemListId},
+		</if>
+		<if test="orderNo != null">
+			order_no = #{orderNo},
+		</if>
+		<if test="chargeStatus != null">
+			charge_status = #{chargeStatus},
+		</if>
+		<if test="creater != null">
+			creater = #{creater},
+		</if>
+		<if test="modifier != null">
+			modifier = #{modifier},
+		</if>
+		<if test="receivableAmt != null">
+			receivable_amt = #{receivableAmt},
+		</if>
+		<if test="recordId != null">
+			record_id = #{recordId},
+		</if>
+		<if test="chargeDate != null">
+			charge_date = #{chargeDate},
+		</if>
+		<if test="chargeOperator != null">
+			charge_operator = #{chargeOperator},
+		</if>
+		<if test="refundDate != null">
+			refund_date = #{refundDate},
+		</if>
+		<if test="refundOperator != null">
+			refund_operator = #{refundOperator}
+		</if>
+
+	</sql>
+</mapper>

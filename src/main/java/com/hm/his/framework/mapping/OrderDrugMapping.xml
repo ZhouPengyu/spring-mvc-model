@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.order.dao.OrderDrugMapper">
+	<resultMap id="BaseResultMap" type="com.hm.his.module.order.model.OrderDrug">
+		<id column="id" property="id" />
+		<result column="dosage" property="dosage" />
+		<result column="create_date" property="createDate" />
+		<result column="drug_id" property="drugId" />
+		<result column="drug_name" property="drugName" />
+		<result column="drug_type" property="drugType" />
+		<result column="flag" property="flag" />
+		<result column="manufacturer" property="manufacturer" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="order_item_list_id" property="orderItemListId" />
+		<result column="order_no" property="orderNo" />
+		<result column="receivable_amt" property="receivableAmt" />
+		<result column="sale_price" property="salePrice" />
+		<result column="sale_unit" property="saleUnit" />
+		<result column="specification" property="specification" />
+		<result column="charge_status" property="chargeStatus" />
+		<result column="record_id" property="recordId" />
+		<result column="gram_count" property="gramCount" />
+		<result column="data_source" property="dataSource" />
+		<result column="sale_channel" property="saleChannel" />
+		<result column="purchase_price" property="purchasePrice" />
+		<result column="profit" property="profit" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="creater" property="creater" />
+		<result column="real_name" property="doctorName" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, dosage, create_date, drug_id, drug_name, drug_type,
+		flag,
+		manufacturer, modify_date,
+		order_item_list_id, order_no,
+		receivable_amt, sale_price, sale_unit, specification,
+		charge_status,record_id,gram_count,data_source,sale_channel,purchase_price,profit,hospital_id
+	</sql>
+
+	<sql id="OrderDrugAndOrderItemCharge">
+		t.id, t.dosage,t.gram_count, t.create_date, t.drug_id,
+		t.drug_name,
+		t.drug_type,
+		t.flag,
+		t.manufacturer, t.modify_date,
+		t.order_item_list_id, t.order_no,
+		a.receivable_amt,t.sale_price,
+		t.sale_unit, t.specification,t.record_id,
+		a.charge_status,t.data_source,t.sale_channel,t.purchase_price,t.profit,t.hospital_id
+	</sql>
+
+	<select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id = #{id} and
+		t.id=a.item_id and
+		a.item_type=2
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=2
+	</select>
+	<select id="selectListByOrderNo" resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=2
+		and t.order_no=#{orderNo}
+	</select>
+	<select id="searchOrderDrugNames" resultType="java.lang.String"
+		parameterType="com.hm.his.module.statistics.pojo.NameRequst">
+		select DISTINCT
+		drug_name
+		from
+		order_drug
+		where
+		drug_name like
+		CONCAT('%',#{name},'%')
+		<if test="hospitalId!=null">
+			and hospital_id=#{hospitalId}
+		</if>
+		<if test="startRecord!=null and pageSize!=null">
+			limit #{startRecord},#{pageSize}
+		</if>
+	</select>
+	<select id="selectByOrderItemListIdAndChargeStatus" resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.order_item_list_id =
+		#{orderItemListId}
+		and
+		t.id=a.item_id and a.item_type=2
+		<if test="chargeStatus==1">
+			and a.charge_status=1
+		</if>
+		<if test="chargeStatus!=1">
+			and a.charge_status &amp; #{chargeStatus}&gt;0
+		</if>
+	</select>
+	<select id="selectList" resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=2
+		<include refid="querySql" />
+	</select>
+	<select id="selectByIds" resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=2 and t.id in
+		<foreach item="item" index="index" collection="ids" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	<delete id="delete" parameterType="java.lang.Long">
+		delete from order_drug
+		where id
+		= #{id}
+	</delete>
+	<delete id="deleteByOrderItemListId" parameterType="java.lang.Long">
+		delete from
+		order_drug
+		where order_item_list_id
+		= #{orderItemListId}
+	</delete>
+	<insert id="insert" parameterType="com.hm.his.module.order.model.OrderDrug"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into order_drug (
+		dosage,gram_count,
+		drug_id, drug_name, drug_type,
+		flag, manufacturer,
+		order_item_list_id,
+		order_no,
+		sale_price, sale_unit,
+		specification,record_id,data_source,sale_channel,purchase_price,profit,hospital_id
+		)
+		values (
+		#{dosage},#{gramCount},
+		#{drugId},
+		#{drugName},
+		#{drugType},
+		#{flag},
+		#{manufacturer},
+		#{orderItemListId},
+		#{orderNo},
+		#{salePrice},
+		#{saleUnit},
+		#{specification},#{recordId},#{dataSource},#{saleChannel},#{purchasePrice},#{profit},#{hospitalId}
+		)
+	</insert>
+	<insert id="insertList" parameterType="com.hm.his.module.order.model.OrderDrug" useGeneratedKeys="true" keyProperty="id">
+		insert into order_drug ( dosage,gram_count,
+		drug_id, drug_name,
+		drug_type,
+		flag,
+		manufacturer,
+		order_item_list_id,
+		order_no,
+		sale_price,
+		sale_unit,
+		specification,record_id,data_source,sale_channel,purchase_price,profit,hospital_id)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			( #{item.dosage},#{item.gramCount},
+			#{item.drugId},
+			#{item.drugName},
+			#{item.drugType},
+			#{item.flag}, #{item.manufacturer},
+			#{item.orderItemListId}, #{item.orderNo},
+			#{item.salePrice},
+			#{item.saleUnit},
+			#{item.specification},#{item.recordId},#{item.dataSource},#{item.saleChannel},#{item.purchasePrice},#{item.profit},#{item.hospitalId}
+			)
+		</foreach>
+
+	</insert>
+	<update id="update" parameterType="com.hm.his.module.order.model.OrderDrug">
+		update order_drug
+		<set>
+			<include refid="setSql"></include>
+		</set>
+		where id = #{id}
+	</update>
+	<select id="selectCountByDrugIdAndDataSource" resultType="java.lang.Integer">
+		select
+		count(*) from order_drug where drug_id=#{drugId} and
+		data_source=#{dataSource}
+	</select>
+
+	<sql id="setSql">
+		<if test="dosage != null">
+			dosage = #{dosage},
+		</if>
+		<if test="gramCount != null">
+			gram_count = #{gramCount},
+		</if>
+		<if test="createDate != null">
+			create_date = #{createDate},
+		</if>
+		<if test="drugId != null">
+			drug_id = #{drugId},
+		</if>
+		<if test="drugName != null">
+			drug_name = #{drugName},
+		</if>
+		<if test="drugType != null">
+			drug_type = #{drugType},
+		</if>
+		<if test="flag != null">
+			flag = #{flag},
+		</if>
+		<if test="manufacturer != null">
+			manufacturer = #{manufacturer},
+		</if>
+		<if test="modifyDate != null">
+			modify_date = #{modifyDate},
+		</if>
+		<if test="orderItemListId != null">
+			order_item_list_id = #{orderItemListId},
+		</if>
+		<if test="orderNo != null">
+			order_no = #{orderNo},
+		</if>
+		<if test="salePrice != null">
+			sale_price = #{salePrice},
+		</if>
+		<if test="saleUnit != null">
+			sale_unit = #{saleUnit},
+		</if>
+		<if test="specification != null">
+			specification = #{specification},
+		</if>
+		<if test="recordId != null">
+			record_id = #{recordId},
+		</if>
+		<if test="dataSource != null">
+			data_source = #{dataSource},
+		</if>
+		<if test="saleChannel != null">
+			sale_channel = #{saleChannel},
+		</if>
+		<if test="purchasePrice != null">
+			purchase_price = #{purchasePrice},
+		</if>
+		<if test="profit != null">
+			profit = #{profit},
+		</if>
+		<if test="hospitalId != null">
+			hospital_id = #{hospitalId}
+		</if>
+	</sql>
+
+	<sql id="querySql">
+		<if test="createDate != null">
+			and t.create_date = #{createDate}
+		</if>
+		<if test="drugId != null">
+			and t.drug_id = #{drugId}
+		</if>
+		<if test="drugName != null">
+			and t.drug_name = #{drugName}
+		</if>
+		<if test="drugType != null">
+			and t.drug_type = #{drugType}
+		</if>
+		<if test="manufacturer != null">
+			and t.manufacturer = #{manufacturer}
+		</if>
+		<if test="modifyDate != null">
+			and t.modify_date = #{modifyDate}
+		</if>
+		<if test="orderItemListId != null">
+			and t.order_item_list_id = #{orderItemListId}
+		</if>
+		<if test="orderNo != null">
+			and t.order_no = #{orderNo}
+		</if>
+		<if test="specification != null">
+			and t.specification = #{specification}
+		</if>
+		<if test="recordId != null">
+			and t.record_id = #{recordId}
+		</if>
+		<if test="dataSource != null">
+			and t.data_source = #{dataSource}
+		</if>
+		<if test="saleChannel != null">
+			and t.sale_channel = #{saleChannel}
+		</if>
+		<if test="hospitalId != null">
+			and t.hospital_id = #{hospitalId}
+		</if>
+	</sql>
+	<!-- 统计相关sql start -->
+	<select id="selectByStatisticsRequest" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+		resultMap="BaseResultMap">
+		select
+		<include refid="OrderDrugAndOrderItemCharge" />
+		from
+		order_drug
+		t,order_item_charge a
+		where
+		t.id=a.item_id and
+		a.item_type=2 and
+		a.charge_status=2
+		<if test="hospitalId!=null">
+			and t.hospital_id=#{hospitalId}
+		</if>
+		<if test="drugName!=null">
+			and t.drug_name like CONCAT('%',#{drugName},'%')
+		</if>
+		<if test="drugType!=null">
+			and t.drug_type=#{drugType}
+		</if>
+		<if test="saleChannel!=null">
+			and t.sale_channel=#{saleChannel}
+		</if>
+		<if test="startDate!=null">
+				<![CDATA[and  a.charge_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null">
+				<![CDATA[and  a.charge_date <= #{endDate} ]]>
+		</if>
+	</select>
+
+	<select id="selectLoadsDrugStatistics" parameterType="com.hm.his.module.statistics.pojo.StatisticsRequest"
+			resultMap="BaseResultMap">
+		SELECT t1.creater, t1.order_no,
+		t1.modify_date, t1.receivable_amt, t1.real_name, od.drug_id,
+		od.drug_name, od.drug_type, od.sale_price,
+		od.dosage, od.gram_count, od.manufacturer, od.sale_unit,
+		od.specification, od.data_source, od.sale_channel FROM order_drug od
+		JOIN
+		(
+			SELECT t2.creater, t2.order_no, t2.modify_date, t2.item_id, t2.receivable_amt, t2.item_type, d.real_name FROM doctor d
+			JOIN(
+				SELECT ho.creater, ho.order_no, oic.modify_date, oic.item_id, oic.receivable_amt, oic.item_type FROM hospital_order ho
+				JOIN order_item_charge oic
+				ON
+				ho.order_no = oic.order_no
+				WHERE oic.charge_status=2
+				<if test="hospitalId != null">
+					AND ho.hospital_id = #{hospitalId}
+				</if>
+				<if test="doctorName !=null">
+					AND ho.creater in(
+					SELECT doctor_id creater
+					FROM doctor
+					WHERE real_name LIKE CONCAT('%',#{doctorName},'%'))
+				</if>
+				<if test="startDate!=null">
+					<![CDATA[and  oic.modify_date >= #{startDate} ]]>
+				</if>
+				<if test="endDate!=null">
+					<![CDATA[and  oic.modify_date <= #{endDate} ]]>
+				</if>
+			)t2
+			ON d.doctor_id = t2.creater
+		)t1
+		on t1.item_id = od.id
+		WHERE t1.item_type=2
+		<if test="drugType != null">
+			AND od.drug_type=#{drugType}
+		</if>
+	</select>
+	<!-- 统计相关sql end -->
+</mapper>

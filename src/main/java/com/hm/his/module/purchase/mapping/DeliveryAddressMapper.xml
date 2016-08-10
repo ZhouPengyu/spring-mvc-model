@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.purchase.dao.DeliveryAddressMapper">
+	<resultMap id="deliveryAddressResultMap"
+		type="com.hm.his.module.purchase.model.DeliveryAddress">
+		<result column="delivery_address_id" property="deliveryAddressId" jdbcType="INTEGER" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="postcode" property="postcode" jdbcType="VARCHAR" />
+		<result column="contacts" property="contacts" jdbcType="VARCHAR" />
+		<result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+		<result column="creater" property="creater" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="phone_no" property="phoneNo" jdbcType="VARCHAR" />
+	</resultMap>
+	
+	<select id="getDefaultAddress" resultMap="deliveryAddressResultMap">
+		select max(delivery_address_id) as delivery_address_id, address, postcode, contacts, 
+			hospital_id, creater, create_date, phone_no
+		from delivery_address where hospital_id = #{hospitalId}
+	</select>
+	
+	<select id="getDeliveryAddressById" resultMap="deliveryAddressResultMap">
+		select delivery_address_id, address, postcode, contacts, 
+			hospital_id, creater, create_date, phone_no
+		from delivery_address where delivery_address_id = #{deliveryAddressId}
+	</select>
+	
+	<insert id="insertDeliveryAddress" parameterType="com.hm.his.module.purchase.model.DeliveryAddress" 
+		useGeneratedKeys="true" keyProperty="deliveryAddressId">
+		insert into 
+			delivery_address 
+				(address, postcode, contacts, hospital_id, creater, create_date, phone_no)
+			values 
+				(#{address}, #{postcode}, #{contacts}, #{hospitalId}, #{creater}, #{createDate}, #{phoneNo})
+	</insert>
+	<update id="updateDeliveryAddress" parameterType="com.hm.his.module.purchase.model.DeliveryAddress">
+		update delivery_address
+		<set>
+			address = #{address},
+			postcode = #{postcode},
+			contacts = #{contacts},
+			hospital_id = #{hospitalId},
+			creater = #{creater},
+			create_date = #{createDate},
+			phone_no = #{phoneNo}
+		</set>
+		where delivery_address_id = #{deliveryAddressId}
+	</update>
+</mapper>

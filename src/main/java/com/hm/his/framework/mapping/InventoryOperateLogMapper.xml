@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.drug.dao.InventoryOperateLogMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.drug.model.InventoryOperateLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_id" property="drugId" jdbcType="INTEGER" />
+    <result column="user_id" property="userId" jdbcType="INTEGER" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="result" property="result" jdbcType="INTEGER" />
+    <result column="before_amount" property="beforeAmount" jdbcType="DOUBLE" />
+    <result column="amount" property="amount" jdbcType="DOUBLE" />
+    <result column="operate_date" property="operateDate" jdbcType="TIMESTAMP" />
+    <result column="operate_action" property="operateAction" jdbcType="INTEGER" />
+
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, drug_id, user_id, user_name,operate_action, result, before_amount, amount , operate_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from inventory_operate_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from inventory_operate_log
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.drug.model.InventoryOperateLog" >
+    insert into inventory_operate_log (id, hospital_id, drug_id, 
+      user_id, user_name,operate_action, result,
+      before_amount, amount,operate_date)
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{drugId,jdbcType=INTEGER}, 
+      #{userId,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{operateAction,jdbcType=INTEGER}, #{result,jdbcType=INTEGER},
+      #{beforeAmount,jdbcType=DOUBLE}, #{amount,jdbcType=DOUBLE}, #{operateDate,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.drug.model.InventoryOperateLog" >
+    insert into inventory_operate_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="drugId != null" >
+        drug_id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="operateAction != null" >
+        operate_action,
+      </if>
+      <if test="result != null" >
+        result,
+      </if>
+      <if test="beforeAmount != null" >
+        before_amount,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="operateAction != null" >
+        #{operateAction,jdbcType=INTEGER},
+      </if>
+      <if test="result != null" >
+        #{result,jdbcType=INTEGER},
+      </if>
+      <if test="beforeAmount != null" >
+        #{beforeAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DOUBLE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.drug.model.InventoryOperateLog" >
+    update inventory_operate_log
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        drug_id = #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="operateAction != null" >
+        operate_action = #{operateAction,jdbcType=INTEGER},
+      </if>
+
+      <if test="result != null" >
+        result = #{result,jdbcType=INTEGER},
+      </if>
+      <if test="beforeAmount != null" >
+        before_amount = #{beforeAmount,jdbcType=DOUBLE},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.drug.model.InventoryOperateLog">
+    update inventory_operate_log
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+    drug_id = #{drugId,jdbcType=INTEGER},
+    user_id = #{userId,jdbcType=INTEGER},
+    user_name = #{userName,jdbcType=VARCHAR},
+    operate_action = #{operateAction,jdbcType=INTEGER},
+    result = #{result,jdbcType=INTEGER},
+    before_amount = #{beforeAmount,jdbcType=DOUBLE},
+    amount = #{amount,jdbcType=DOUBLE}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

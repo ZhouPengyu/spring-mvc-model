@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.quote.dao.QuoteOrderMapper">
+	<resultMap id="quoteOrderResultMap" type="com.hm.his.module.quote.model.QuoteOrder">
+		<id column="quote_order_id" property="quoteOrderId" jdbcType="INTEGER" />
+		<result column="purchase_order_id" property="purchaseOrderId" jdbcType="INTEGER" />
+		<result column="purchase_order_number" property="purchaseOrderNumber" jdbcType="VARCHAR"/>
+		<result column="quote_way" property="quoteWay" jdbcType="INTEGER" />
+		<result column="way_id" property="wayId" jdbcType="INTEGER" />
+		<result column="schedule_delivery" property="scheduleDelivery" jdbcType="TIMESTAMP" />
+		<result column="total_price" property="totalPrice" jdbcType="DOUBLE" />
+		<result column="phone_no" property="phoneNo" jdbcType="VARCHAR" />
+		<result column="remark" property="remark" jdbcType="VARCHAR" />
+		<result column="message" property="message" jdbcType="VARCHAR" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="creater" property="creater" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="purchase_create_date" property="purchaseCreateDate" jdbcType="VARCHAR"/>
+		<result column="flag" property="flag" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		quote_order_id, purchase_order_id, purchase_order_number, quote_way, schedule_delivery, way_id,
+		total_price, phone_no, remark, message, status, creater, create_date, purchase_create_date, flag
+	</sql>
+
+	<insert id="insertQuoteOrder" parameterType="com.hm.his.module.quote.model.QuoteOrder" useGeneratedKeys="true" keyProperty="quoteOrderId">
+		insert into 
+			quote_order 
+				(
+					purchase_order_id, purchase_order_number, quote_way, way_id, schedule_delivery, total_price,
+					phone_no, remark, message,  status, creater, purchase_create_date,flag
+				)
+			values (
+				#{purchaseOrderId}, #{purchaseOrderNumber}, #{quoteWay}, #{wayId},  #{scheduleDelivery}, #{totalPrice},
+				#{phoneNo}, #{remark}, #{message}, #{status}, #{creater}, #{purchaseCreateDate}, #{flag})
+	</insert>
+
+
+	<update id="updateQuoteOrder" parameterType="com.hm.his.module.quote.model.QuoteOrder">
+		update quote_order
+		<set>
+			<if test="purchaseOrderId != null">
+				purchase_order_id = #{purchaseOrderId},
+			</if>
+			<if test="quoteWay != null">
+				quote_way = #{quoteWay},
+			</if>
+			<if test="purchaseOrderNumber != null and purchaseOrderNumber != '' ">
+				purchase_order_number = #{purchaseOrderNumber},
+			</if>
+			<if test="wayId != null">
+				way_id = #{wayId},
+			</if>
+			<if test="scheduleDelivery != null">
+				schedule_delivery = #{scheduleDelivery},
+			</if>
+			<if test="totalPrice != null">
+				total_price = #{totalPrice},
+			</if>
+			<if test="phoneNo != null">
+				phone_no = #{phoneNo},
+			</if>
+			<if test="remark != null">
+				remark = #{remark},
+			</if>
+			<if test="message != null">
+				message = #{message},
+			</if>
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="creater != null">
+				creater = #{creater},
+			</if>
+			<if test="createDate != null">
+				create_date = #{createDate},
+			</if>
+			<if test="createDate != null">
+				purchase_create_date = #{purchaseCreateDate},
+			</if>
+			<if test="flag != null">
+				flag = #{flag}
+			</if>
+		</set>
+		where quote_order_id = #{quoteOrderId}
+	</update>
+
+	<select id="queryQuoteOrderByOrderId" parameterType="java.lang.Integer" resultMap="quoteOrderResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM quote_order
+		WHERE quote_order_id=#{quoteOrderId}
+	</select>
+	
+	<update id="cancelQuoteOrder" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest">
+		UPDATE quote_order
+		SET `status`=0
+		WHERE quote_order_id=#{quoteOrderId}
+	</update>
+
+	<select id="queryQuoteOrder" resultMap="quoteOrderResultMap" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest">
+		select
+		<include refid="Base_Column_List" />
+		from quote_order qo
+		where flag = 1
+		<if test="purchaseOrderId != null">
+			and qo.purchase_order_id = #{purchaseOrderId}
+		</if>
+		<if test="purchaseOrderNumber != null and purchaseOrderNumber != ''">
+			and qo.purchase_order_number = #{purchaseOrderNumber}
+		</if>
+		<if test="startDate!=null and startDate != ''">
+			<![CDATA[and  qo.purchase_create_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null and endDate != ''">
+			<![CDATA[and  qo.purchase_create_date <= #{endDate} ]]>
+		</if>
+		<if test="status != null">
+			and qo.`status` = #{status}
+		</if>
+		<if test="creater != null">
+			and qo.creater = #{creater}
+		</if>
+		ORDER BY create_date DESC
+		limit #{startRecord}, #{pageSize}
+	</select>
+
+	<select id="queryQuoteOrderCount" resultType="java.lang.Integer" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest">
+		select count(quote_order_id)
+		from quote_order
+		where flag = 1
+		<if test="purchaseOrderNumber != null and purchaseOrderNumber != ''">
+			and purchase_order_number = #{purchaseOrderNumber}
+		</if>
+		<if test="startDate!=null and startDate != ''">
+			<![CDATA[and  purchase_create_date >= #{startDate} ]]>
+		</if>
+		<if test="endDate!=null and endDate != ''">
+			<![CDATA[and  purchase_create_date <= #{endDate} ]]>
+		</if>
+		<if test="status != null">
+			and status = #{status}
+		</if>
+		<if test="creater != null">
+			and creater = #{creater}
+		</if>
+	</select>
+
+	<select id="queryQuoteOrderByCreater" resultMap="quoteOrderResultMap" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest">
+		select
+		<include refid="Base_Column_List" />
+		from quote_order qo
+		where flag = 1
+		<if test="creater != null">
+			and qo.creater = #{creater}
+		</if>
+	</select>
+
+	<select id="getQuoteOrderDetailByPurchaseOrderId" resultMap="quoteOrderResultMap" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM quote_order
+		WHERE creater=#{creater}
+		AND purchase_order_id=#{purchaseOrderId}
+	</select>
+
+	<select id="queryQuoteOrderByPurchaseOrderId" resultMap="quoteOrderResultMap" parameterType="java.lang.Integer">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM quote_order
+		WHERE purchase_order_id = #{purchaseOrderId}
+		AND status != 0
+	</select>
+
+	<select id="queryQuoteOrderId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+		SELECT quote_order_id FROM purchase_quote_relation
+		WHERE purchase_order_id
+		in(
+		 	SELECT purchase_order_id
+		 	FROM purchase_quote_relation
+		 	WHERE
+		 		quote_order_id=#{quoteOrderId}
+		 		AND `status`=2
+		 	)
+	</select>
+
+	<select id="queryQuoteOrderPrimaryKey" parameterType="com.hm.his.module.quote.pojo.QuoteOrderRequest" resultType="java.lang.Integer">
+		SELECT quote_order_id
+		FROM quote_order qo
+		WHERE flag = 1
+		<if test="creater != null and creater != ''">
+			and qo.creater = #{creater}
+		</if>
+		<if test="purchaseOrderId != null and purchaseOrderId != ''">
+			and qo.purchase_order_id = #{purchaseOrderId}
+		</if>
+		ORDER BY qo.create_date DESC
+		LIMIT 1
+	</select>
+	<!--QuoteOrderRecord-->
+	<insert id="insertQuoteOrderRecord" parameterType="com.hm.his.module.quote.model.QuoteOrder">
+		insert into
+		quote_order_record
+		(
+		quote_order_id, purchase_order_id, purchase_order_number, quote_way, way_id, schedule_delivery, total_price, purchase_create_date,
+		phone_no, remark, message,  status, creater, flag
+		)
+		values(
+		#{quoteOrderId}, #{purchaseOrderId}, #{purchaseOrderNumber}, #{quoteWay}, #{wayId},  #{scheduleDelivery}, #{totalPrice}, #{purchaseCreateDate},
+		#{phoneNo}, #{remark}, #{message}, #{status}, #{creater}, #{flag})
+	</insert>
+	<!--Record End-->
+</mapper>

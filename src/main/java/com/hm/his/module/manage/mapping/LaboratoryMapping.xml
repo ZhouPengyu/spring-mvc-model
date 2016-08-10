@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.manage.dao.LaboratoryMapper">
+	<resultMap id="laboratoryResultMap" type="com.hm.his.module.manage.model.Laboratory">
+		<result column="laboratory_id" property="laboratoryId" />
+		<result column="laboratory_name" property="laboratoryName" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="create_date" property="createDate" />
+		<result column="creater" property="creater" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="modifier" property="modifier" />
+		<result column="flag" property="flag" />
+	</resultMap>
+	
+	<select id="searchLaboratory" resultMap="laboratoryResultMap">
+		SELECT laboratory_id,laboratory_name,hospital_id,create_date,creater,modify_date,modifier,flag 
+		FROM laboratory WHERE flag = 1
+		<if test="hospitalId != null">
+			and hospital_id = #{hospitalId} 
+		</if>
+		<if test="examId != null">
+			and laboratory_id = #{laboratoryId} 
+		</if>
+	</select>
+	
+	<select id="searchLaboratoryTotal" resultType="java.lang.Integer">
+		SELECT count(laboratory_id) FROM laboratory WHERE flag = 1
+		<if test="hospitalId != null">
+			and hospital_id = #{hospitalId} 
+		</if>
+		<if test="examId != null">
+			and laboratory_id = #{laboratoryId} 
+		</if>
+	</select>
+	
+	<select id="verifyLaboratoryName" resultType="java.lang.Integer">
+		SELECT count(laboratory_id) FROM laboratory 
+		WHERE flag = 1 
+			and hospital_id = #{hospitalId} 
+			and laboratory_name = #{laboratoryName}
+	</select>
+	
+	<insert id="insertLaboratory" parameterType="com.hm.his.module.manage.model.Laboratory" useGeneratedKeys="true" keyProperty="examId">
+		INSERT INTO laboratory (laboratory_name, hospital_id, creater, modifier, flag) 
+		VALUES (#{laboratoryName}, #{hospitalId}, #{creater}, #{modifier}, #{flag});
+	</insert>
+	
+	<update id="updateLaboratory" parameterType="com.hm.his.module.manage.model.Laboratory">
+		UPDATE laboratory set 
+			laboratory_name=#{laboratoryName}, hospital_id=#{hospitalId}, 
+			modifier=#{modifier}, flag=#{flag} 
+		WHERE laboratory_id = #{laboratoryId}
+	</update>
+	
+	<update id="deleteLaboratory">
+		UPDATE laboratory set flag=0 WHERE laboratory_id = #{laboratoryId} and hospital_id = #{hospitalId}
+	</update>
+</mapper>

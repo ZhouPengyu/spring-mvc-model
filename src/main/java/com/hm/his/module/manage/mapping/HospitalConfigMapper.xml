@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.manage.dao.HospitalConfigMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.manage.model.HospitalConfig" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="config_type" property="configType" jdbcType="INTEGER" />
+    <result column="attr_name" property="attrName" jdbcType="VARCHAR" />
+    <result column="attr_value" property="attrValue" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, hospital_id, config_type, attr_name, attr_value, remark
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from hospital_config
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="searchHospitalConfigList" resultMap="BaseResultMap" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    select
+    <include refid="Base_Column_List" />
+    from hospital_config
+    where hospital_id = #{hospitalId} and config_type = #{configType}
+  </select>
+
+
+  <delete id="deleteHospitalConfigByHospitalIdAndConfigType" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    delete from hospital_config
+    where hospital_id = #{hospitalId} and config_type = #{configType}
+  </delete>
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from hospital_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    insert into hospital_config (id, hospital_id, config_type, 
+      attr_name, attr_value, remark
+      )
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{configType,jdbcType=INTEGER}, 
+      #{attrName,jdbcType=VARCHAR}, #{attrValue,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <insert id="batchInsertHospitalConfig" parameterType="com.hm.his.module.manage.model.HospitalConfig">
+    insert into hospital_config (id, hospital_id, config_type,
+    attr_name, attr_value, remark )
+    values
+    <foreach collection="list" item="configs" index="index"
+             separator=",">
+      (#{configs.id,jdbcType=INTEGER}, #{configs.hospitalId,jdbcType=INTEGER}, #{configs.configType,jdbcType=INTEGER},
+      #{configs.attrName,jdbcType=VARCHAR}, #{configs.attrValue,jdbcType=VARCHAR}, #{configs.remark,jdbcType=VARCHAR}
+      )
+    </foreach>
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    insert into hospital_config
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="configType != null" >
+        config_type,
+      </if>
+      <if test="attrName != null" >
+        attr_name,
+      </if>
+      <if test="attrValue != null" >
+        attr_value,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="configType != null" >
+        #{configType,jdbcType=INTEGER},
+      </if>
+      <if test="attrName != null" >
+        #{attrName,jdbcType=VARCHAR},
+      </if>
+      <if test="attrValue != null" >
+        #{attrValue,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    update hospital_config
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="configType != null" >
+        config_type = #{configType,jdbcType=INTEGER},
+      </if>
+      <if test="attrName != null" >
+        attr_name = #{attrName,jdbcType=VARCHAR},
+      </if>
+      <if test="attrValue != null" >
+        attr_value = #{attrValue,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.manage.model.HospitalConfig" >
+    update hospital_config
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+      config_type = #{configType,jdbcType=INTEGER},
+      attr_name = #{attrName,jdbcType=VARCHAR},
+      attr_value = #{attrValue,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

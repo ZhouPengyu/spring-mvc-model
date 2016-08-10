@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.message.dao.MessageMapper">
+    <resultMap id="messageResultMap" type="com.hm.his.module.message.model.Message">
+        <result column="message_id" property="messageId"/>
+        <result column="message_head" property="messageHead"/>
+        <result column="message_body" property="messageBody"/>
+        <result column="hospital_id" property="hospitalId"/>
+        <result column="creater" property="creater"/>
+        <result column="url" property="url" />
+        <result column="create_date" property="createDate"/>
+        <result column="modify_date" property="modifyDate"/>
+        <result column="flag" property="flag"/>
+
+        <result column="priority" property="priority"/>
+        <result column="status" property="status"/>
+        <result column="box_id" property="boxId"/>
+        <result column="count" property="count"/>
+    </resultMap>
+
+    <select id="findMessageById" resultMap="messageResultMap">
+        SELECT
+        message_id, message_head, message_body, hospital_id, url, create_date, modify_date, creater, flag
+        FROM message
+        WHERE
+        message_id=#{messageId}
+    </select>
+
+    <insert id="saveMessage" parameterType="com.hm.his.module.message.model.Message" useGeneratedKeys="true"
+            keyProperty="messageId">
+        INSERT INTO message (message_head, message_body, hospital_id, creater)
+        VALUES (#{messageHead}, #{messageBody}, #{hospitalId}, #{creater})
+    </insert>
+
+    <!--消息通知管理-->
+    <insert id="sendMessage" parameterType="java.util.List">
+        INSERT INTO message_notify(doctor_id, message_id, priority, box_id, hospital_id)
+        VALUES
+        <foreach collection="list" item="notify" index="index" separator=",">
+            (#{notify.doctorId}, #{notify.messageId}, #{notify.priority}, #{notify.boxId}, #{notify.hospitalId})
+        </foreach>
+    </insert>
+    <select id="queryMessageList" parameterType="com.hm.his.module.message.pojo.MessageRequestPojo"
+            resultMap="messageResultMap">
+        SELECT
+        mn.priority, mn.`status`, mn.create_date, mn.message_id, mn.box_id, m.message_head
+        FROM
+        message_notify mn
+        JOIN message m ON mn.message_id = m.message_id
+        WHERE 1 = 1
+        <if test="messageHead != null">
+            AND m.message_head like CONCAT('%', #{messageHead}, '%')
+        </if>
+        <if test="status != null">
+            AND mn.`status` = #{status}
+        </if>
+        <if test="boxId != null">
+            AND mn.box_id LIKE CONCAT(#{boxId}, '%')
+        </if>
+        <if test="doctorId != null">
+            AND mn.doctor_id = #{doctorId}
+        </if>
+        AND mn.flag = 1
+        ORDER BY mn.priority DESC, mn.create_date DESC
+        LIMIT #{startRecord}, #{pageSize}
+    </select>
+
+    <select id="queryReadCount"  resultMap="messageResultMap">
+        SELECT mn.box_id, COUNT(mn.box_id) count, mn.`status` FROM message_notify mn
+        WHERE doctor_id=#{doctorId}
+        <if test="status != null">
+            AND mn.`status`=#{status}
+        </if>
+        GROUP BY mn.box_id;
+    </select>
+
+    <select id="queryMessageListCount" parameterType="com.hm.his.module.message.pojo.MessageRequestPojo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        message_notify mn
+        JOIN message m ON mn.message_id = m.message_id
+        WHERE 1=1
+        <if test="messageHead != null">
+            and m.message_head like CONCAT('%', #{messageHead}, '%')
+        </if>
+        <if test="status != null">
+            AND mn.`status` = #{status}
+        </if>
+        <if test="boxId != null">
+            AND mn.box_id LIKE CONCAT(#{boxId}, '%')
+        </if>
+        <if test="doctorId != null">
+            AND mn.doctor_id = #{doctorId}
+        </if>
+        AND mn.flag = 1
+    </select>
+
+    <select id="queryMessageStatus" resultMap="messageResultMap">
+        SELECT status, box_id
+        FROM message_notify
+        WHERE
+        doctor_id=#{doctorId} AND message_id=#{messageId}
+    </select>
+
+    <update id="updateMessageAsterisk">
+        UPDATE message_notify
+        <set>
+            box_id=
+            CASE box_id
+            WHEN 13 THEN 10
+            WHEN 10 THEN 13
+            END
+        </set>
+        WHERE message_id=#{messageId} AND doctor_id=#{doctorId}
+    </update>
+
+    <update id="updateMessageStatus">
+        UPDATE message_notify
+        SET
+            status = 1
+        WHERE message_id = #{messageId} AND doctor_id = #{doctorId}
+    </update>
+
+    <update id="deleteMessage" parameterType="java.util.List">
+        UPDATE message_notify
+        <set>
+            box_id=
+            CASE box_id
+            WHEN 10 THEN 20
+            WHEN 13 THEN 23
+            END
+        </set>
+        WHERE doctor_id=#{doctorId}
+        <if test="messageId != null">
+            AND message_id = #{messageId}
+        </if>
+        <if test="boxId != null">
+            AND box_Id LIKE CONCAT(#{boxId}, '%')
+        </if>
+        <if test="status != null">
+            AND status=#{status}
+        </if>
+    </update>
+
+    <update id="allToRead">
+        UPDATE message_notify
+        <set>
+            status = #{status}
+        </set>
+        WHERE doctor_id=#{doctorId}
+        <if test="boxId != null">
+            and box_id like CONCAT(#{boxId}, '%')
+        </if>
+    </update>
+
+
+</mapper>

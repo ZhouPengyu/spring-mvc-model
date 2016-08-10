@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.drug.dao.DrugInventoryMapper" >
+  <resultMap id="BaseResultMap" type="com.hm.his.module.drug.model.DrugInventory" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_id" property="drugId" jdbcType="INTEGER" />
+    <result column="inventory_count" property="inventoryCount" jdbcType="DOUBLE" />
+    <result column="goods_shelf_code" property="goodsShelfCode" jdbcType="VARCHAR" />
+    <result column="inventory_threshold" property="inventoryThreshold" jdbcType="INTEGER" />
+    <result column="inventory_ceiling" property="inventoryCeiling" jdbcType="INTEGER" />
+    <result column="validity_date" property="validityDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <resultMap id="HospitalResultMap" type="com.hm.his.module.instock.pojo.HospitalDrugInventoryPojo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="hospital_id" property="hospitalId" jdbcType="INTEGER" />
+    <result column="drug_name" property="drugName" jdbcType="VARCHAR" />
+    <result column="drug_type" property="drugType" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="flag" property="flag" jdbcType="INTEGER" />
+    <result column="approval_number" property="approvalNumber" jdbcType="VARCHAR" />
+    <result column="bar_code" property="barCode" jdbcType="VARCHAR" />
+    <result column="spec_minimum_dosage" property="specMinimumDosage" jdbcType="DOUBLE" />
+    <result column="specification" property="specification" jdbcType="VARCHAR" />
+    <result column="spec_minimum_unit" property="specMinimumUnit" jdbcType="VARCHAR" />
+    <result column="spec_unit" property="specUnit" jdbcType="VARCHAR" />
+    <result column="spec_unitary_ratio" property="specUnitaryRatio" jdbcType="INTEGER" />
+    <result column="spec_package_unit" property="specPackageUnit" jdbcType="VARCHAR" />
+    <result column="manufacturer" property="manufacturer" jdbcType="VARCHAR" />
+    <result column="open_stock" property="openStock" jdbcType="INTEGER" />
+    <result column="inventory_count" property="inventoryCount" jdbcType="DOUBLE" />
+    <result column="validity_date" property="validityDate" jdbcType="TIMESTAMP" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, hospital_id, drug_id, inventory_count, goods_shelf_code, inventory_threshold,
+    inventory_ceiling, validity_date
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from drug_inventory
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="selectByDrugId" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from drug_inventory where
+    <if test="drugId!=null">
+      drug_id =#{drugId}
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from drug_inventory
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insertDrugInventoryByList" parameterType="com.hm.his.module.drug.model.DrugInventory">
+    insert into drug_inventory ( hospital_id, drug_id,
+    inventory_count, goods_shelf_code)
+    values
+    <foreach collection="list" item="drugs" index="index"
+             separator=",">
+      (#{drugs.hospitalId,jdbcType=INTEGER}, #{drugs.drugId,jdbcType=INTEGER},
+      #{drugs.inventoryCount,jdbcType=DOUBLE}, #{drugs.goodsShelfCode,jdbcType=VARCHAR})
+    </foreach>
+  </insert>
+
+  <insert id="insert" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    insert into drug_inventory (id, hospital_id, drug_id,
+    inventory_count, goods_shelf_code, inventory_threshold,
+    inventory_ceiling, validity_date)
+    values (#{id,jdbcType=INTEGER}, #{hospitalId,jdbcType=INTEGER}, #{drugId,jdbcType=INTEGER},
+    #{inventoryCount,jdbcType=INTEGER}, #{goodsShelfCode,jdbcType=VARCHAR}, #{inventoryThreshold,jdbcType=INTEGER},
+    #{inventoryCeiling,jdbcType=INTEGER}, #{validityDate,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    insert into drug_inventory
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="hospitalId != null" >
+        hospital_id,
+      </if>
+      <if test="drugId != null" >
+        drug_id,
+      </if>
+      <if test="inventoryCount != null" >
+        inventory_count,
+      </if>
+      <if test="goodsShelfCode != null" >
+        goods_shelf_code,
+      </if>
+      <if test="inventoryThreshold != null" >
+        inventory_threshold,
+      </if>
+      <if test="inventoryCeiling != null" >
+        inventory_ceiling,
+      </if>
+      <if test="validityDate != null" >
+        validity_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="hospitalId != null" >
+        #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="inventoryCount != null" >
+        #{inventoryCount,jdbcType=INTEGER},
+      </if>
+      <if test="goodsShelfCode != null" >
+        #{goodsShelfCode,jdbcType=VARCHAR},
+      </if>
+      <if test="inventoryThreshold != null" >
+        #{inventoryThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="inventoryCeiling != null" >
+        #{inventoryCeiling,jdbcType=INTEGER},
+      </if>
+      <if test="validityDate != null" >
+        #{validityDate,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    update drug_inventory
+    <set >
+      <if test="hospitalId != null" >
+        hospital_id = #{hospitalId,jdbcType=INTEGER},
+      </if>
+      <if test="drugId != null" >
+        drug_id = #{drugId,jdbcType=INTEGER},
+      </if>
+      <if test="inventoryCount != null" >
+        inventory_count = #{inventoryCount,jdbcType=INTEGER},
+      </if>
+      <if test="goodsShelfCode != null" >
+        goods_shelf_code = #{goodsShelfCode,jdbcType=VARCHAR},
+      </if>
+      <if test="inventoryThreshold != null" >
+        inventory_threshold = #{inventoryThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="inventoryCeiling != null" >
+        inventory_ceiling = #{inventoryCeiling,jdbcType=INTEGER},
+      </if>
+      <if test="validityDate != null" >
+        validity_date = #{validityDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByHospitalIdAndDrugId" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    update drug_inventory
+    <set >
+      <if test="inventoryCount != null" >
+        inventory_count = #{inventoryCount,jdbcType=DOUBLE},
+      </if>
+      <if test="goodsShelfCode != null" >
+        goods_shelf_code = #{goodsShelfCode,jdbcType=VARCHAR},
+      </if>
+      <if test="inventoryThreshold != null" >
+        inventory_threshold = #{inventoryThreshold,jdbcType=INTEGER},
+      </if>
+      <if test="inventoryCeiling != null" >
+        inventory_ceiling = #{inventoryCeiling,jdbcType=INTEGER},
+      </if>
+      <if test="validityDate != null" >
+        validity_date = #{validityDate,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where  drug_id = #{drugId,jdbcType=INTEGER}
+  </update>
+
+
+  <update id="cutInventoryByHospitalIdAndDrugId" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    update drug_inventory
+    <set >
+      <if test="inventoryCount != null" >
+        inventory_count = inventory_count - #{inventoryCount,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where hospital_id = #{hospitalId,jdbcType=INTEGER} and drug_id = #{drugId,jdbcType=INTEGER}
+  </update>
+
+  <update id="returnInventoryByHospitalIdAndDrugId" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    update drug_inventory
+    <set >
+      <if test="inventoryCount != null" >
+        inventory_count = inventory_count + #{inventoryCount,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where hospital_id = #{hospitalId,jdbcType=INTEGER} and drug_id = #{drugId,jdbcType=INTEGER}
+  </update>
+
+
+  <update id="updateByPrimaryKey" parameterType="com.hm.his.module.drug.model.DrugInventory" >
+    update drug_inventory
+    set hospital_id = #{hospitalId,jdbcType=INTEGER},
+    drug_id = #{drugId,jdbcType=INTEGER},
+    inventory_count = #{inventoryCount,jdbcType=INTEGER},
+    goods_shelf_code = #{goodsShelfCode,jdbcType=VARCHAR},
+    inventory_threshold = #{inventoryThreshold,jdbcType=INTEGER},
+    inventory_ceiling = #{inventoryCeiling,jdbcType=INTEGER},
+    validity_date = #{validityDate,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="searchDrugListForValidityWarning" resultMap="HospitalResultMap" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select hd.id,hd.hospital_id,drug_name,drug_type,specification,spec_minimum_dosage,spec_minimum_unit,spec_package_unit,
+    spec_unit,spec_unitary_ratio, open_stock, manufacturer,di.inventory_count,di.validity_date
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1 and di.inventory_count <![CDATA[ > ]]>0
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and di.validity_date <![CDATA[<=]]> #{compareValidityDate}
+    order by di.validity_date limit #{startRecord},#{pageSize}
+  </select>
+
+  <select id="countDrugListForValidityWarning" resultType="java.lang.Integer" parameterType="com.hm.his.module.instock.pojo.InstockRequest" >
+    select
+    count(1)
+    from hospital_drug hd LEFT JOIN drug_inventory di on hd.id = di.drug_id
+    where hd.hospital_id=#{hospitalId} and hd.flag=1 and di.inventory_count <![CDATA[ > ]]>0
+    <if test="drugType!=null">
+      and hd.drug_type=#{drugType}
+    </if>
+    and di.validity_date <![CDATA[<=]]> #{compareValidityDate}
+  </select>
+
+</mapper>

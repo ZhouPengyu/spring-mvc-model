@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.user.dao.DoctorMapper">
+	<resultMap id="doctorResultMap" type="com.hm.his.module.user.model.Doctor">
+		<result column="doctor_id" property="doctorId" />
+		<result column="doctor_name" property="doctorName" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="hospital_name" property="hospitalName" />
+		<result column="real_name" property="realName" />
+		<result column="phone" property="phone" />
+		<result column="mail" property="mail" />
+		<result column="laboratory_id" property="laboratoryId" />
+		<result column="laboratory_name" property="laboratoryName" />
+		<result column="gender" property="gender" />
+		<result column="is_admin" property="isAdmin" />
+		<result column="status" property="status" />
+		<result column="flag" property="flag" />
+	</resultMap>
+
+	<resultMap id="DoctorPasswordMap" type="com.hm.his.module.user.model.Doctor">
+		<result column="doctor_id" property="doctorId" />
+		<result column="doctor_name" property="doctorName" />
+		<result column="hospital_id" property="hospitalId" />
+		<result column="hospital_name" property="hospitalName" />
+		<result column="password" property="password" />
+		<result column="high_passwd" property="highPasswd" />
+	</resultMap>
+	
+	<resultMap id="doctorPatientRelationResultMap" type="com.hm.his.module.user.model.DoctorPatientRelation">
+		<result column="id" property="id" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="patient_id" property="patientId" />
+	</resultMap>
+
+	<select id="getDoctorById" resultMap="doctorResultMap">
+		SELECT a.doctor_id, a.doctor_name, a.hospital_id, b.hospital_name, a.real_name, a.phone, a.mail, a.laboratory_id, a.gender, a.is_admin, a.status, a.flag
+		FROM his.doctor a left join his.hospital b on a.hospital_id = b.hospital_id where a.doctor_id = #{doctorId} and status != 4
+	</select>
+
+	<select id="getDoctorByName" resultMap="doctorResultMap">
+		SELECT a.doctor_id, a.doctor_name, a.hospital_id, b.hospital_name, a.real_name, a.phone, a.mail, a.laboratory_id, a.gender, a.is_admin, a.status, a.flag 
+		FROM his.doctor a left join his.hospital b on a.hospital_id = b.hospital_id where a.doctor_name = #{doctorName} and status != 4
+	</select>
+
+
+
+	<select id="searchDoctorForUpdatePwd" resultMap="DoctorPasswordMap" parameterType="com.hm.his.module.user.model.Doctor">
+		SELECT a.doctor_id, a.doctor_name, a.hospital_id, a.password, a.high_passwd
+		FROM his.doctor a
+	</select>
+	
+	<select id="searchDoctor" resultMap="doctorResultMap" parameterType="com.hm.his.module.user.model.Doctor">
+		SELECT a.doctor_id, a.doctor_name, a.hospital_id, b.hospital_name, a.real_name, a.phone, a.mail, l.laboratory_id, l.laboratory_name, a.gender, a.is_admin, a.status, a.flag 
+		FROM his.doctor a 
+		left join his.hospital b on a.hospital_id = b.hospital_id 
+		left join his.laboratory l on a.laboratory_id = l.laboratory_id and l.flag = 1 
+		where 1=1 
+		<if test="doctorName != null and doctorName != ''">
+			and a.doctor_name = #{doctorName}
+		</if>
+		<if test="phone != null and phone != ''">
+			and a.phone = #{phone}
+		</if>
+		<if test="doctorId != null">
+			and a.doctor_id = #{doctorId}
+		</if>
+		<if test="hospitalId != null">
+			and a.hospital_id = #{hospitalId}
+		</if>
+		<if test="laboratoryId != null">
+			and a.laboratory_id = #{laboratoryId}
+		</if>
+		<if test="isAdmin != null">
+			and a.is_admin = #{isAdmin}
+		</if>
+		 and status != 4 order by doctor_id desc
+	</select>
+
+	<select id="getPassword" resultMap="DoctorPasswordMap">
+		SELECT doctor_id,password,high_passwd FROM doctor
+		WHERE doctor_name = #{doctorName} and status != 4
+	</select>
+
+	<select id="getDoctorByIdList" resultMap="doctorResultMap">
+		SELECT doctor_id, doctor_name, hospital_id, real_name, phone, status, flag 
+		FROM doctor
+		WHERE doctor_id in
+		<foreach item="doctorId" index="index" collection="list" open="("
+			separator="," close=")">
+			#{doctorId}
+		</foreach>
+	</select>
+
+	<insert id="insertDoctor" parameterType="com.hm.his.module.user.model.Doctor" useGeneratedKeys="true" keyProperty="doctorId">
+		INSERT INTO doctor (doctor_name, hospital_id, password,high_passwd, real_name, phone, mail, gender, laboratory_id, is_admin, status, flag)
+		VALUES (#{doctorName}, #{hospitalId}, #{password},#{highPasswd}, #{realName}, #{phone}, #{mail}, #{gender}, #{laboratoryId}, #{isAdmin}, #{status}, #{flag});
+	</insert>
+	
+	<update id="deleteDoctor">
+		UPDATE doctor set status = 4 WHERE doctor_id = #{doctorId} and hospital_id = #{hospitalId}
+	</update>
+
+	<update id="updateDoctor" parameterType="com.hm.his.module.user.model.Doctor">
+		UPDATE doctor
+		<set>
+			doctor_name = #{doctorName},
+			<if test="password != null and password != ''">
+				password = #{password},
+			</if>
+			<if test="highPasswd != null and highPasswd != ''">
+				high_passwd = #{highPasswd},
+			</if>
+			hospital_id = #{hospitalId},
+			real_name = #{realName},
+			phone = #{phone},
+			mail = #{mail},
+			gender = #{gender},
+			laboratory_id = #{laboratoryId},
+			status = #{status},
+			is_admin = #{isAdmin},
+			flag = #{flag}
+		</set>
+		WHERE doctor_id = #{doctorId}
+	</update>
+
+	<update id="updateByPrimaryKeySelective" parameterType="com.hm.his.module.user.model.Doctor" >
+		update doctor
+		<set >
+			<if test="doctorName != null" >
+				doctor_name = #{doctorName,jdbcType=VARCHAR},
+			</if>
+			<if test="hospitalId != null" >
+				hospital_id = #{hospitalId,jdbcType=INTEGER},
+			</if>
+			<if test="password != null" >
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="highPasswd != null" >
+				high_passwd = #{highPasswd,jdbcType=VARCHAR},
+			</if>
+			<if test="realName != null" >
+				real_name = #{realName,jdbcType=VARCHAR},
+			</if>
+			<if test="phone != null" >
+				phone = #{phone,jdbcType=VARCHAR},
+			</if>
+			<if test="status != null" >
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="mail != null" >
+				mail = #{mail,jdbcType=VARCHAR},
+			</if>
+			<if test="laboratoryId != null" >
+				laboratory_id = #{laboratoryId,jdbcType=INTEGER},
+			</if>
+			<if test="gender != null" >
+				gender = #{gender,jdbcType=INTEGER},
+			</if>
+			<if test="isAdmin != null" >
+				is_admin = #{isAdmin,jdbcType=INTEGER},
+			</if>
+			<if test="flag != null" >
+				flag = #{flag,jdbcType=INTEGER},
+			</if>
+		</set>
+		where doctor_id = #{doctorId,jdbcType=INTEGER}
+	</update>
+
+	<select id="verifyUserName" resultType="java.lang.Integer">
+		SELECT count(doctor_id) FROM doctor WHERE doctor_name = #{userName} and status != 4
+	</select>
+	
+	<insert id="insertDoctorPatientRelation" >
+		INSERT INTO doctor_patient_relation (doctor_id, patient_id)
+		VALUES (#{doctorId}, #{patientId});
+	</insert>
+	
+	<select id="isDoctorPatientRelation" resultType="java.lang.Integer">
+		SELECT count(id) FROM doctor_patient_relation WHERE doctor_id = #{doctorId} and patient_id = #{patientId}
+	</select>
+</mapper>

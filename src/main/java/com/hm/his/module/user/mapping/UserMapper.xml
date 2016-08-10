@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.user.dao.UserMapper">
+	<resultMap id="userResultMap" type="com.hm.his.module.user.model.User">
+		<id column="user_id" property="userId" />
+		<result column="open_id" property="openId" />
+		<result column="nickname" property="nickname" />
+		<result column="sex" property="sex" />
+		<result column="city" property="city" />
+		<result column="province" property="province" />
+		<result column="country" property="country" />
+		<result column="headimgurl" property="headimgurl" />
+		<result column="subscribe_time" property="subscribeTime" />
+		<result column="unionid" property="unionid" />
+		<result column="remark" property="remark" />
+		<result column="phone_no" property="phoneNo" />
+		<result column="email" property="email" />
+		<result column="real_name" property="realName" />
+		<result column="identity_card" property="identityCard" />
+		<result column="user_name" property="userName" />
+		<result column="password" property="password" />
+	</resultMap>
+	
+	<select id="getUserByOpenId" resultMap="userResultMap">
+		select * from user where open_id = #{openId};
+	</select>
+	
+	<delete id="deleteByUserId" >
+		delete from user where user_id = #{userId}
+	</delete>
+	<insert id="insertUser" parameterType="com.hm.his.module.user.model.User">
+		insert into user 
+			(
+				user_id, open_id, nickname, sex, city, province, country,
+				headimgurl, subscribe_time, unionid, remark, phone_no,
+				email, real_name, identity_card, user_name, password
+			)
+		values 
+			(
+				#{userId}, #{openId}, #{nickname}, #{sex}, #{city}, #{province},
+				#{country}, #{headimgurl}, #{subscribeTime}, #{unionid}, #{remark},
+				#{phoneNo}, #{email}, #{realName}, #{identityCard}, #{userName}, #{password}
+			)
+	</insert>
+	<update id="updateUser" parameterType="com.hm.his.module.user.model.User">
+		update user 
+		set
+			open_id = #{openId},
+			nickname = #{nickname},
+			sex = #{sex},
+			city = #{city},
+			province = #{province},
+			country = #{country},
+			headimgurl = #{headimgurl},
+			subscribe_time = #{subscribeTime},
+			unionid = #{unionid},
+			remark = #{remark},
+			phone_no = #{phoneNo},
+			email = #{email},
+			real_name = #{realName},
+			identity_card = #{identityCard},
+			user_name = #{userName},
+			password = #{password}
+		where user_id = #{userId}
+	</update>
+</mapper>

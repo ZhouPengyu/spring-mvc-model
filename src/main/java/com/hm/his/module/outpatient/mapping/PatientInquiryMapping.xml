@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientInquiryMapper">
+	<resultMap id="inquiryResultMap" type="com.hm.his.module.outpatient.model.PatientInquiry">
+		<result column="record_id" property="recordId" />
+		<result column="patient_id" property="patientId" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="temperature" property="temperature" />
+		<result column="age" property="age" />
+		<result column="age_type" property="ageType" />
+		<result column="SBP" property="sbp" />
+		<result column="DBP" property="dbp" />
+		<result column="heart_rate" property="heartRate" />
+		<result column="height" property="height" />
+		<result column="weight" property="weight" />
+		<result column="symptom" property="symptom" />
+		<result column="other_physique" property="otherPhysique" />
+		<result column="present_illness" property="presentIllness" />
+		<result column="previous_history" property="previousHistory" />
+		<result column="personal_history" property="personalHistory" />
+		<result column="allergy_history" property="allergyHistory" />
+		<result column="family_history" property="familyHistory" />
+		<result column="phys_exam" property="physExam" />
+		<result column="create_date" property="createDate" />
+		<result column="modify_date" property="modifyDate" />
+		<result column="doctor_advice" property="doctorAdvice" />
+		<result column="ver" property="ver" />
+		<result column="price" property="price"/>
+		<result column="modle" property="modle"/>
+	</resultMap>
+
+	<select id="getInquiryByRecordId" resultMap="inquiryResultMap">
+		SELECT record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, 
+			create_date, modify_date, other_physique, price, modle 
+		FROM inquiry_info WHERE record_id = #{recordId}
+	</select>
+
+	<select id="getInquiryNewByPatientId" resultMap="inquiryResultMap">
+		SELECT record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, 
+			create_date, modify_date, other_physique, price, modle 
+		FROM inquiry_info 
+		WHERE patient_id = #{patientId} AND ver > 0 order by modify_date desc limit 1
+	</select>
+
+	<select id="getInquiryByPatientId" resultMap="inquiryResultMap">
+		SELECT record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, 
+			create_date, modify_date, other_physique, price, modle 
+		FROM inquiry_info 
+		WHERE patient_id = #{patientId} AND ver > 0 order by record_id desc
+	</select>
+
+	<select id="getInquiryByDoctorId" resultMap="inquiryResultMap">
+		SELECT record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, 
+			create_date, modify_date, other_physique, price, modle 
+		FROM inquiry_info 
+		WHERE doctor_id = #{doctorId} AND ver>0 order by record_id desc
+	</select>
+
+	<select id="getTodayPatientInquiry" resultMap="inquiryResultMap">
+    	<![CDATA[SELECT record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, create_date, modify_date, 
+			other_physique, price, modle FROM inquiry_info where modify_date >= #{startToday} and modify_date <= #{endToday} and doctor_id = #{doctorId} order by modify_date desc]]>
+	</select>
+
+	<insert id="insertInquiry" parameterType="com.hm.his.module.outpatient.model.PatientInquiry" useGeneratedKeys="true" keyProperty="recordId">
+		INSERT INTO inquiry_info (
+			record_id, patient_id, doctor_id, temperature, age, age_type, 
+			SBP, DBP, heart_rate, height, weight, symptom, present_illness, previous_history, 
+			personal_history, allergy_history, family_history, phys_exam, doctor_advice, ver, other_physique, price, modle
+		)
+		VALUES (
+			#{recordId}, #{patientId}, #{doctorId}, #{temperature}, #{age}, #{ageType}, #{sbp}, #{dbp}, #{heartRate}, 
+			#{height}, #{weight}, #{symptom}, #{presentIllness}, #{previousHistory}, #{personalHistory}, 
+			#{allergyHistory}, #{familyHistory}, #{physExam}, #{doctorAdvice}, #{ver}, #{otherPhysique}, #{price}, #{modle}
+		);
+	</insert>
+
+	<update id="updateInquiry" parameterType="com.hm.his.module.outpatient.model.PatientInquiry">
+		UPDATE inquiry_info
+		<set>
+				record_id = #{recordId},
+				patient_id = #{patientId},
+				doctor_id = #{doctorId},
+				temperature = #{temperature},
+				age = #{age}, 
+				age_type = #{ageType}, 
+				SBP = #{sbp},
+				DBP = #{dbp},
+				heart_rate = #{heartRate},
+				height = #{height},
+				weight = #{weight},
+				symptom = #{symptom},
+				present_illness = #{presentIllness},
+				previous_history = #{previousHistory},
+				personal_history = #{personalHistory},
+				allergy_history = #{allergyHistory},
+				family_history = #{familyHistory},
+				phys_exam = #{physExam},
+				doctor_advice = #{doctorAdvice},
+				ver = #{ver},
+				other_physique = #{otherPhysique},
+				price = #{price},
+				modle = #{modle}
+		</set>
+		WHERE record_id = #{recordId}
+	</update>
+
+	<select id="getPatientLatestRecordId" resultType="long">
+		SELECT max(record_id) as record_id FROM inquiry_info 
+		WHERE patient_id = #{patientId} and doctor_id = #{doctorId}
+	</select>
+	
+	<select id="getRecordSeq" resultType="java.lang.Integer">
+		SELECT NEXTVAL ('RECORD_SEQ') as NEXTVAL
+	</select>
+</mapper>

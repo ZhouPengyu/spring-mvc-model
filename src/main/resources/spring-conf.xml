@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx" 
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans  
+	    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd  
+	    http://www.springframework.org/schema/context  
+	    http://www.springframework.org/schema/context/spring-context-3.1.xsd  
+	    http://www.springframework.org/schema/util 
+		http://www.springframework.org/schema/util/spring-util.xsd 
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx.xsd 
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd">
+	
+	<!-- 引入属性文件 -->
+<!-- 	<context:property-placeholder location="classpath:core.properties" /> -->
+	<context:property-placeholder location="file:/hm/config/core.properties" />
+   	<bean id="propertyPlaceholderConfigurer" class="com.hm.his.framework.utils.SystemConfig">
+		<property name="locations">
+			<list>
+<!-- 				<value>classpath:core.properties</value> -->
+				<value>file:/hm/config/core.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<tx:annotation-driven />
+	<context:component-scan base-package="com.hm.his" />
+	
+
+	
+	<!-- mybatis -->
+	<bean id="his" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="${mysql.his.db.url}" />
+		<property name="username" value="${mysql.his.db.user}" />
+		<property name="password" value="${mysql.his.db.password}" />
+		<!--initialSize: 初始化连接 -->
+		<property name="initialSize" value="${mysql.his.db.initialPoolSize}" />
+		<!--maxIdle: 最大空闲连接 -->
+		<property name="maxIdle" value="${mysql.his.db.maxIdle}" />
+		<!--minIdle: 最小空闲连接 -->
+		<property name="minIdle" value="${mysql.his.db.minIdle}" />
+		<!--maxActive: 最大连接数量 -->
+		<property name="maxActive" value="${mysql.his.db.maxActive}" />
+		<property name="maxWait" value="${mysql.his.db.maxWait}" />
+
+		<property name="validationQuery" value="${mysql.his.db.validationQuery}" />
+		<property name="testWhileIdle" value="${mysql.his.db.testWhileIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${mysql.his.db.timeBetweenEvictionRunsMillis}" />
+		<property name="numTestsPerEvictionRun" value="${mysql.his.db.numTestsPerEvictionRun}" />
+		<property name="minEvictableIdleTimeMillis" value="${mysql.his.db.minEvictableIdleTimeMillis}" />
+	</bean>
+
+	<bean id="hmcdss" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="${mysql.hmcdss.db.url}" />
+		<property name="username" value="${mysql.hmcdss.db.user}" />
+		<property name="password" value="${mysql.hmcdss.db.password}" />
+		<!--initialSize: 初始化连接 -->
+		<property name="initialSize" value="${mysql.hmcdss.db.initialPoolSize}" />
+		<!--maxIdle: 最大空闲连接 -->
+		<property name="maxIdle" value="${mysql.hmcdss.db.maxIdle}" />
+		<!--minIdle: 最小空闲连接 -->
+		<property name="minIdle" value="${mysql.hmcdss.db.minIdle}" />
+		<!--maxActive: 最大连接数量 -->
+		<property name="maxActive" value="${mysql.hmcdss.db.maxActive}" />
+		<property name="maxWait" value="${mysql.hmcdss.db.maxWait}" />
+
+		<property name="validationQuery" value="${mysql.hmcdss.db.validationQuery}" />
+		<property name="testWhileIdle" value="${mysql.hmcdss.db.testWhileIdle}" />
+		<property name="timeBetweenEvictionRunsMillis" value="${mysql.hmcdss.db.timeBetweenEvictionRunsMillis}" />
+		<property name="numTestsPerEvictionRun" value="${mysql.hmcdss.db.numTestsPerEvictionRun}" />
+		<property name="minEvictableIdleTimeMillis" value="${mysql.hmcdss.db.minEvictableIdleTimeMillis}" />
+	</bean>
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="multipleDataSource" />
+		<property name="mapperLocations">
+			<list>
+				<value>classpath*:com/hm/his/framework/mapping/*.xml</value>
+				<value>classpath*:com/hm/his/module/**/mapping/*.xml</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="multipleDataSource" class="com.hm.his.framework.model.MultipleDataSource">
+		<property name="defaultTargetDataSource" ref="his" />
+		<property name="targetDataSources">
+			<map>
+				<entry key="his" value-ref="his" />
+				<entry key="hmcdss" value-ref="hmcdss" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="multipleDataSource" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.hm.his.module.*.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<!-- redis -->
+	<bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig"></bean>
+	<bean id="connectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+		<property name="hostName" value="${redis.host}" />
+		<property name="port" value="${redis.port}" />
+		<property name="password" value="${redis.password}" />
+		<property name="timeout" value="${redis.timeout}" />
+		<property name="poolConfig" ref="jedisPoolConfig" />
+		<property name="usePool" value="true" />
+	</bean>
+	<bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration" />
+	<util:constant static-field="org.springframework.session.data.redis.config.ConfigureRedisAction.NO_OP"/>
+
+
+
+</beans>

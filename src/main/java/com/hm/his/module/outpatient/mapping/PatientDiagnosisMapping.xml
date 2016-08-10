@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientDiagnosisMapper">
+	<resultMap id="diagnosisResultMap" type="com.hm.his.module.outpatient.model.PatientDiagnosis">
+		<result column="record_id" property="recordId" />
+		<result column="disease_id" property="diseaseId" />
+		<result column="disease_name" property="diseaseName" />
+	</resultMap>
+
+	<select id="getDiagnosisByRecordId" resultMap="diagnosisResultMap">
+		SELECT record_id,disease_id,disease_name FROM diagnosis_result WHERE record_id = #{recordId} and status = 0
+	</select>
+
+	<insert id="insertDiagnosis" parameterType="com.hm.his.module.outpatient.model.PatientDiagnosis">
+		INSERT INTO diagnosis_result (record_id, disease_id, disease_name)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{recordId}, #{item.diseaseId}, #{item.diseaseName})
+		</foreach>
+	</insert>
+
+	<update id="deleteDiagnosisByRecordId">
+		UPDATE diagnosis_result set status = 1 WHERE record_id = #{recordId}
+	</update>
+
+	<select id="getDiagnosisByRecordList" resultMap="diagnosisResultMap">
+		SELECT record_id,disease_id,disease_name FROM diagnosis_result
+		WHERE status = 0 AND record_id IN
+		<foreach item="item" index="index" collection="list" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+</mapper>

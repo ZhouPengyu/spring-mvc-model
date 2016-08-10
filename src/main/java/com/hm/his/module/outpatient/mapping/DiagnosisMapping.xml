@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.DiagnosisMapper">
+	<resultMap id="diagnosisResultMap" type="com.hm.his.module.outpatient.model.Diagnosis">
+		<result column="id" property="diseaseId" />
+		<result column="disease_name" property="diseaseName" />
+	</resultMap>
+
+	<select id="fuzzyQueryByName" resultMap="diagnosisResultMap">
+		SELECT id,disease_name FROM disease 
+		WHERE 
+			disease_name like CONCAT(CONCAT('%', #{name}), '%') 
+			or pinyin like CONCAT(CONCAT(#{name}), '%') 
+			or pinyin_first like CONCAT(#{name}, '%') 
+			order by length(disease_name) asc limit 10;
+	</select>
+
+	<select id="fuzzyQueryByDefault" resultMap="diagnosisResultMap">
+		SELECT id,disease_name FROM disease
+		WHERE 
+			id in (34051, 7733, 621, 34470, 33831, 608, 5455, 863, 34145, 12608,
+				161, 1081, 34161, 35041, 33989, 8922, 340) 
+			order by length(disease_name) asc;
+	</select>
+
+	<select id="getDiagnosisByIdList" resultMap="diagnosisResultMap">
+		SELECT id, disease_name FROM disease
+		WHERE id in
+		<foreach item="id" index="index" collection="list" open="("
+			separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.outpatient.dao.PatientDrugMapper">
+	<resultMap id="drugResultMap" type="com.hm.his.module.outpatient.model.PatientDrug">
+		<result column="id" property="id" />
+		<result column="record_id" property="recordId" />
+		<result column="patient_id" property="patientId" />
+		<result column="doctor_id" property="doctorId" />
+		<result column="drug_id" property="drugId" />
+		<result column="drug_name" property="drugName" />
+		<result column="usage" property="usage" />
+		<result column="frequency" property="frequency" />
+		<result column="dosage" property="dosage" />
+		<result column="dosage_unit" property="dosageUnit" />
+		<result column="duration" property="duration" />
+		<result column="total_dosage" property="totalDosage" />
+		<result column="total_dosage_unit" property="totalDosageUnit" />
+		<result column="type" property="type" />
+		<result column="comment" property="comment" />
+		<result column="daily_dosage" property="dailyDosage" />
+		<result column="requirement" property="requirement" />
+		<result column="create_date" property="createDate" />
+		<result column="ass_id" property="assId" />
+		<result column="prescription" property="prescription" />
+		<result column="data_source" property="dataSource"/>
+		<result column="price" property="price"/>
+		<result column="univalence" property="univalence"/>
+		<result column="specification" property="specification" />
+	</resultMap>
+	
+	<resultMap id="chineseDrugResultMap" type="com.hm.his.module.outpatient.model.PatientChineseDrug">
+		<result column="pa_ch_drug_id" property="paChDrugId" />
+		<result column="record_id" property="recordId" />
+		<result column="total_dosage" property="totalDosage" />
+		<result column="daily_dosage" property="dailyDosage" />
+		<result column="frequency" property="frequency" />
+		<result column="usage" property="usage" />
+		<result column="requirement" property="requirement" />
+		<result column="prescription" property="prescription" />
+	</resultMap>
+	
+	<resultMap id="chineseDrugPiecesResultMap" type="com.hm.his.module.outpatient.model.PatientChineseDrugPieces">
+		<result column="pa_ch_drug_pieces_id" property="paChDrugPiecesId" />
+		<result column="pa_ch_drug_id" property="paChDrugId" />
+		<result column="drug_id" property="drugId" />
+		<result column="drug_name" property="drugName" />
+		<result column="value" property="value" />
+		<result column="unit" property="unit" />
+		<result column="comment" property="comment" />
+		<result column="data_source" property="dataSource"/>
+		<result column="price" property="price"/>
+		<result column="univalence" property="univalence"/>
+		<result column="specification" property="specification"/>
+	</resultMap>
+
+	<select id="getDrugByRecordId" resultMap="drugResultMap">
+		SELECT id, record_id, patient_id, doctor_id, drug_id, drug_name, `usage`, frequency, 
+			dosage, dosage_unit, duration, total_dosage, total_dosage_unit, type, 
+			comment, daily_dosage, requirement, status, create_date, modify_date, ass_id, 
+			case when prescription is null then 1 else prescription end as prescription, 
+			data_source, price, univalence, specification
+		FROM patient_drug WHERE record_id = #{recordId} and status = 0
+	</select>
+	
+	<select id="getChineseDrugByRecordId" resultMap="chineseDrugResultMap">
+		SELECT * FROM patient_chinese_drug WHERE record_id = #{recordId} and status = 0
+	</select>
+	
+	<select id="getChineseDrugPieces" resultMap="chineseDrugPiecesResultMap">
+		SELECT * FROM patient_chinese_drug_pieces WHERE pa_ch_drug_id = #{paChDrugId} and status = 0
+	</select>
+
+	<select id="getDrugByPrescription" resultMap="drugResultMap">
+		SELECT * FROM patient_drug WHERE record_id = #{recordId} and prescription = #{prescription} and status = 0
+	</select>
+	
+	<select id="getPatientDrugByPrescription" resultMap="drugResultMap">
+		SELECT * FROM patient_drug WHERE prescription = #{prescription} and status = 0
+	</select>
+	
+	<select id="getChineseDrugByPrescription" resultMap="chineseDrugResultMap">
+		SELECT * FROM patient_chinese_drug WHERE prescription = #{prescription} and status = 0
+	</select>
+	
+	<insert id="insertChineseDrugPrescription" parameterType="com.hm.his.module.outpatient.model.PatientChineseDrug"  useGeneratedKeys="true" keyProperty="paChDrugId">
+		INSERT INTO patient_chinese_drug (record_id, total_dosage, daily_dosage, frequency, `usage`, requirement, prescription)
+		VALUES (#{recordId}, #{totalDosage}, #{dailyDosage}, #{frequency}, #{usage}, #{requirement}, #{prescription})
+	</insert>
+	
+	<insert id="insertPrescriptionPiecesByList" parameterType="com.hm.his.module.outpatient.model.PatientChineseDrugPieces">
+		INSERT INTO patient_chinese_drug_pieces (pa_ch_drug_id, drug_id, drug_name, `value`, unit, comment, data_source, price, univalence, specification)
+		VALUES 
+		<foreach collection="list" item="pieces" index="index"
+			separator=",">
+			(	
+				#{paChDrugId}, #{pieces.drugId}, #{pieces.drugName}, #{pieces.value}, #{pieces.unit}, 
+				#{pieces.comment}, #{pieces.dataSource}, #{pieces.price}, #{pieces.univalence}, #{pieces.specification}
+			)
+		</foreach>
+	</insert>
+	
+	<insert id="insertDrug" parameterType="com.hm.his.module.outpatient.model.PatientDrug" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO patient_drug (record_id, patient_id, doctor_id, drug_id, 
+		drug_name, `usage`, frequency, dosage, dosage_unit, 
+		duration, total_dosage, total_dosage_unit, type, comment, daily_dosage, 
+		requirement, ass_id, prescription, data_source, price, univalence, specification)
+		VALUES (
+			#{recordId}, #{patientId}, #{doctorId}, #{drugId}, 
+			#{drugName}, #{usage}, #{frequency}, 
+			#{dosage}, #{dosageUnit}, 
+			#{duration}, #{totalDosage}, #{totalDosageUnit}, 
+			#{type}, #{comment}, #{dailyDosage}, 
+			#{requirement}, #{assId}, #{prescription}, 
+			#{dataSource}, #{price}, #{univalence}, #{specification}
+		)
+	</insert>
+
+	<insert id="insertDrugByList" parameterType="java.util.List">
+		INSERT INTO patient_drug (record_id, patient_id, doctor_id, drug_id, 
+		drug_name, `usage`, frequency, dosage, dosage_unit, 
+		duration, total_dosage, total_dosage_unit, type, comment, daily_dosage, 
+		requirement, ass_id, prescription, data_source, price, univalence, specification)
+		VALUES
+		<foreach collection="list" item="drug" index="index" separator=",">
+			(
+				#{drug.recordId}, #{drug.patientId}, #{drug.doctorId}, #{drug.drugId}, 
+				#{drug.drugName}, #{drug.usage}, #{drug.frequency}, 
+				#{drug.dosage}, #{drug.dosageUnit}, 
+				#{drug.duration}, #{drug.totalDosage}, #{drug.totalDosageUnit}, 
+				#{drug.type}, #{drug.comment}, #{drug.dailyDosage}, 
+				#{drug.requirement}, #{drug.assId}, #{prescription}, 
+				#{drug.dataSource}, #{drug.price}, #{drug.univalence}, #{drug.specification}
+			)
+		</foreach>
+	</insert>
+	
+	<update id="deletePatientDrugPrescription">
+		UPDATE patient_drug SET status = 1 
+		WHERE prescription = #{prescription} and status = 0
+	</update>
+	
+	<update id="deleteChineseDrugPrescription">
+		UPDATE patient_chinese_drug SET status = 1 
+		WHERE prescription = #{prescription} and status = 0
+	</update>
+
+	<update id="delDrugByRecordId">
+		UPDATE patient_drug SET status = 1 
+		WHERE record_id = #{recordId} and status = 0
+	</update>
+	
+	<update id="delChineseDrugByRecordId">
+		UPDATE patient_chinese_drug SET status = 1 WHERE record_id = #{recordId} and status = 0
+	</update>
+	
+	<update id="delChinesePiecesByRecordId">
+		UPDATE patient_chinese_drug_pieces SET status = 1 
+		WHERE pa_ch_drug_id in (select pa_ch_drug_id from patient_chinese_drug where record_id = #{recordId}) and 
+		status = 0
+	</update>
+	
+	<update id="delChinesePiecesByPaChDrugId">
+		UPDATE patient_chinese_drug_pieces SET status = 1 
+		WHERE pa_ch_drug_id in (#paChDrugId}) and 
+		status = 0
+	</update>
+	
+	<update id="delChinesePiecesByPrescription">
+		UPDATE patient_chinese_drug_pieces SET status = 1 
+		WHERE pa_ch_drug_id in (SELECT pa_ch_drug_id FROM patient_chinese_drug WHERE prescription = #{prescription} and status = 0) and 
+		status = 0
+	</update>
+	
+	<select id="getPrescription" resultType="java.lang.Long">
+		SELECT NEXTVAL ('PRESCRIPTION_SEQ') as NEXTVAL
+	</select>
+</mapper>

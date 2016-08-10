@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hm.his.module.quote.dao.SupplyAddressMapper">
+	<resultMap id="supplyAddressResultMap" type="com.hm.his.module.quote.model.SupplyAddress">
+		<id column="supply_address_id" property="supplyAddressId" jdbcType="INTEGER" />
+		<result column="address" property="address" jdbcType="VARCHAR" />
+		<result column="contacts" property="contacts" jdbcType="VARCHAR" />
+		<result column="phone_no" property="phoneNo" jdbcType="VARCHAR" />
+		<result column="creater" property="creater" jdbcType="INTEGER" />
+		<result column="create_date" property="createDate" jdbcType="TIMESTAMP" />
+		<result column="postcode" property="postcode" jdbcType="VARCHAR"/>
+		<result column="hospital_id" property="hospitalId" jdbcType="INTEGER"/>
+	</resultMap>
+	<sql id="Base_Column_List">
+		supply_address_id, address, contacts, phone_no, creater, create_date, postcode, hospital_id
+	</sql>
+	<insert id="insertSupplyAddress" parameterType="com.hm.his.module.quote.model.SupplyAddress" useGeneratedKeys="true" keyProperty="supplyAddressId">
+		insert into 
+			supply_address (address, contacts, phone_no, creater, hospital_id, postcode)
+			values (#{address}, #{contacts}, #{phoneNo}, #{creater}, #{hospitalId}, #{postcode})
+	</insert>
+	<update id="updateSupplyAddress" parameterType="com.hm.his.module.quote.model.SupplyAddress">
+		update supply_address
+		<set>
+			<if test="address != null and address != ''">
+				address = #{address},
+			</if>
+			<if test="contacts != null and contacts != ''">
+				contacts = #{contacts},
+			</if>
+			<if test="phoneNo != null and phoneNo != ''">
+				phone_no = #{phoneNo},
+			</if>
+			<if test="creater != null">
+				creater = #{creater}
+			</if>
+		</set>
+		where supply_address_id = #{supplyAddressId}
+	</update>
+
+	<select id="getAddressById" parameterType="java.lang.Integer" resultMap="supplyAddressResultMap">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM supply_address
+		WHERE supply_address_id = #{supplyAddressId}
+	</select>
+
+	<select id="getSupplyAddress" resultMap="supplyAddressResultMap" parameterType="java.lang.Integer">
+		select supply_address_id, address, postcode, contacts,
+		hospital_id, creater, create_date, phone_no
+		from supply_address where hospital_id = #{hospitalId}
+		ORDER BY create_date DESC LIMIT 1
+	</select>
+</mapper>
